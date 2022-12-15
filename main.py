@@ -17,10 +17,11 @@ if __name__ == '__main__':
 
     while True:
         frame = world.drawDEM()
+        dt = world.simulation_step
 
         drone_master.tryToScheduleTask(drones)
         for key, drone in drones.items():
-            drone.fly()
+            drone.fly(dt)
 
         world.drawStations(frame)
         world.drawDrones(frame)

@@ -5,6 +5,7 @@
  - simulation_step: time of each step (in seconds)
  - drone_speed: m/s (30 km/h ~= 8.3 m/s)
  - drone_life: seconds (30 minutes ~= 1800 seconds)
+ - charge_time: seconds (5 minutes ~= 300 seconds, we use a lot of pre-charged batteries)
 
 ## drones.json
 

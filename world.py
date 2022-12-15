@@ -24,6 +24,7 @@ class World:
         self.simulation_step = world_data["simulation_step"]  # in seconds
         self.drones_speed = world_data["drone_speed"]  # m/s
         self.drone_lifetime = world_data["drone_life"]  # in seconds
+        self.charge_time = world_data["charge_time"]  # in seconds
 
         self.dem_image_scale_ratio = window_height // self.dem_image.height
         self.window_height = self.dem_image.height * self.dem_image_scale_ratio
@@ -50,6 +51,7 @@ class World:
         return int(x * ratio), int(y * ratio)
 
     def drawDEM(self):
+        # TODO draw red zones (w.r.t. self.maximum_allowed_height)
         image = self.dem_image.convert('RGB')
         image = np.array(image)
         image = cv2.resize(image, (self.window_width, self.window_height))
@@ -73,6 +75,8 @@ class World:
             fontColor = BLACK
             fontScale, thickness, lineType = 1, 1, 2
             cv2.putText(frame, text, bottomLeftCornerOfText, font, fontScale, fontColor, thickness, lineType)
+            if drone.targetX is not None:
+                cv2.line(frame, self.toWindowPixel(drone.x, drone.y), self.toWindowPixel(drone.targetX, drone.targetY), RED)
 
     def drawStations(self, frame):
         station_radius = 10
