@@ -70,12 +70,13 @@ class Drone:
         self.charge_time_left = max(0, self.charge_time_left - dt)
         if self.charge_time_left == 0:
             self.charge_time_left = None
+            self.lifetime_left = self.max_lifetime
             print("Drone {}: charge finished".format(self.key))
             if self.targetMission is None:
                 print("Drone {}: charged! waiting...".format(self.key))
                 self.state = "wait"
             else:
-                print("Drone {}: charged! continue mission {}".format(self.targetMission.key))
+                print("Drone {}: charged! continue mission {}".format(self.key, self.targetMission.key))
                 self.state = "flyToMission"
 
     def checkIfBatteryIsLow(self, charge_stations):
