@@ -1,0 +1,31 @@
+## world.json
+
+ - dem_resolution: meters/pixel
+ - maximum_allowed_height: any intensity in DEM bigger than maximum_allowed_height is prohibited
+ - simulation_step: time of each step (in seconds)
+ - drone_speed: m/s (30 km/h ~= 8.3 m/s)
+ - drone_life: seconds (30 minutes ~= 1800 seconds)
+
+## drones.json
+
+Possible payloads:
+
+ - agro
+ - 3dLidar
+ - highresCamera
+ - gimbolCamera
+ - cargo
+ - geoRadar
+
+## tasks.json
+
+Possible tasks:
+
+ - agro
+ - 3dLidar
+ - highresCamera
+ - gimbolCamera
+ - cargo
+ - geoRadar
+
+
