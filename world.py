@@ -74,15 +74,6 @@ class World:
 
         image = cv2.resize(image, (self.window_width, self.window_height))
 
-        # TODO: DELETE ME, this is just a demonstration of path planning:
-        xys = self.estimatePath(30 * self.dem_resolution, 25*self.dem_resolution, 16000, 17000)
-        for x, y in xys:
-            cv2.circle(image, self.toWindowPixel(x, y), 5, colors.BLUE)
-        for i in range(1, len(xys)):
-            x0, y0 = xys[i - 1]
-            x1, y1 = xys[i]
-            cv2.line(image, self.toWindowPixel(x0, y0), self.toWindowPixel(x1, y1), colors.BLUE)
-
         return image
 
     def drawDrones(self, frame):
@@ -132,6 +123,24 @@ class World:
 
                 cv2.circle(frame, (x, y), waypoint_radius, color, waypoint_thickness)
 
+
+
+    def drawPathMissions(self, frame, missions):
+
+        waypoint_radius = 2
+        waypoint_thickness = 2
+
+        for mission in missions:
+            for i, waypoint in enumerate(mission.waypoints):
+
+                x, y = self.toWindowPixel(waypoint[0], waypoint[1])
+                color = colors.CYAN if mission.waypoint_visited[i] else colors.YELLOW
+
+                if i > 0:
+                    xprev, yprev = self.toWindowPixel(mission.waypoints[i-1][0], mission.waypoints[i-1][1])
+                    cv2.line(frame, (xprev, yprev), (x, y), color)
+
+                cv2.circle(frame, (x, y), waypoint_radius, color, waypoint_thickness)
 
 
     def drawStations(self, frame):

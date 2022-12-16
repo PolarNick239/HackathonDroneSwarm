@@ -2,7 +2,7 @@ from station import load_stations
 from drone import load_drones
 from world import World
 import colors
-from mission import Mission, MissionPoly
+from mission import Mission, MissionPoly, MissionPath
 import random
 
 import cv2
@@ -31,10 +31,17 @@ if __name__ == '__main__':
     print(" +/-   - speedup/slowdown simulation")
     print("__________________________________")
 
+    poly_missions = []
+    poly_missions.append(MissionPoly(0, "scan", [(10000, 5000), (20000, 5000), (15000, 10000), (10000, 10000)], 500))
+    poly_missions.append(MissionPoly(1, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 500))
+
+    path_missions = []
+    path = world.estimatePath(16000, 17000, 30*world.dem_resolution, 25*world.dem_resolution) + world.estimatePath(30 * world.dem_resolution, 25*world.dem_resolution, 16000, 17000)
+    path_missions.append(MissionPath(2, "path", path))
+
     mission_list = []
-    mission_list.append(MissionPoly(0, "scan", [(10000, 5000), (20000, 5000), (15000, 10000), (10000, 10000)], 500))
-    mission_list.append(MissionPoly(1, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 500))
-    all_missions = [mission for mission in mission_list]
+    mission_list += poly_missions
+    mission_list += path_missions
 
     # mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]
 
@@ -56,7 +63,8 @@ if __name__ == '__main__':
 
         world.drawStations(frame)
         world.drawDrones(frame)
-        world.drawPolygonMissions(frame, all_missions) #TODO move to world?
+        world.drawPolygonMissions(frame, poly_missions) #TODO move to world?
+        world.drawPathMissions(frame, path_missions) #TODO move to world?
 
         cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
 

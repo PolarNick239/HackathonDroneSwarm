@@ -70,3 +70,27 @@ class MissionPoly:
 
     def nextWaypoint(self):
         return self.waypoints[self.n_waypoints_visited]
+
+
+
+class MissionPath:
+
+    def __init__(self, key, type, path):
+        self.key = key
+        self.type = type
+        self.waypoints = path
+        self.waypoint_visited = [False for _ in self.waypoints]
+        self.n_waypoints_visited = 0
+
+    def update(self, dt):
+        self.waypoint_visited[self.n_waypoints_visited] = True
+        self.n_waypoints_visited += 1
+
+    def finished(self):
+        return self.n_waypoints_visited >= len(self.waypoints)
+
+    def hasNextWaypoint(self):
+        return not self.finished()
+
+    def nextWaypoint(self):
+        return self.waypoints[self.n_waypoints_visited]
