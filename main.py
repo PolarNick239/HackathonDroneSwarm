@@ -15,13 +15,15 @@ if __name__ == '__main__':
     world.addDrones(drone_master, drones)
     world.addStations(control_station, charge_stations)
 
+    is_paused = False
     while True:
         frame = world.drawDEM()
         dt = world.simulation_step
 
-        drone_master.tryToScheduleTask(drones)
-        for key, drone in drones.items():
-            drone.update(world, dt)
+        if not is_paused:
+            drone_master.tryToScheduleTask(drones)
+            for key, drone in drones.items():
+                drone.update(world, dt)
 
         world.drawStations(frame)
         world.drawDrones(frame)
@@ -30,4 +32,13 @@ if __name__ == '__main__':
         key = cv2.waitKey(1000//60)  # lock to 60 fps
         if key == 27:  # Escape
             break
+        elif key == 32:  # Space bar
+            if not is_paused:
+                is_paused = True
+                print("Paused!")
+            else:
+                is_paused = False
+                print("Un-paused!")
+        elif key != -1:
+            print("Unhandled key: {}".format(key))
     cv2.destroyAllWindows()
