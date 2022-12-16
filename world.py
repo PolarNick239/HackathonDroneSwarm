@@ -168,35 +168,45 @@ class World:
         nvertices = self.dem_image.width * self.dem_image.height
         print("building {} vertices graph w.r.t. DEM...".format(nvertices))
         self.g = nx.Graph()
+        ignore_dem = False  # for debug/development speedup
         for j in range(self.dem_image.height - 1):
             for i in range(self.dem_image.width - 1):
-                if self.dem_prohibited_mask[j, i]:
-                    continue
-                # for dj in range(2):
-                #     for di in range(-1, 2):
-                for dj in range(3):
-                    for di in range(-2, 3):
-                        if di == 0 and dj == 0:
-                            continue
-                        if i + di < 0 or i + di >= self.dem_image.width or j + dj >= self.dem_image.height:
-                            continue
-                        if self.dem_prohibited_mask[j + dj, i + di]:
-                            continue
-                        if abs(di) == 2 and dj == 0 and self.dem_prohibited_mask[j + 0, i + di // 2]:
-                            continue
-                        if abs(di) == 2 and dj == 1 and self.dem_prohibited_mask[j + 0, i + di // 2] and \
-                                self.dem_prohibited_mask[j + 1, i + di // 2]:
-                            continue
-                        if abs(di) == 1 and dj == 2 and self.dem_prohibited_mask[j + dj // 2, i + 0] and \
-                                self.dem_prohibited_mask[j + dj // 2, i + di]:
-                            continue
-                        if abs(di) == 0 and dj == 2 and self.dem_prohibited_mask[j + 1, i + 0]:
-                            continue
-                        distance = dist(di * self.dem_resolution, dj * self.dem_resolution)
-                        v0 = self.toVertexId(i, j)
-                        v1 = self.toVertexId(i + di, j + dj)
-                        v0, v1 = min(v0, v1), max(v0, v1)
-                        self.g.add_edge(v0, v1, weight=distance)
+                if ignore_dem:
+                    v0 = self.toVertexId(i, j)
+                    v1 = self.toVertexId(i+1, j)
+                    self.g.add_edge(v0, v1, weight=1)
+                    v1 = self.toVertexId(i, j+1)
+                    self.g.add_edge(v0, v1, weight=1)
+                    v1 = self.toVertexId(i+1, j+1)
+                    self.g.add_edge(v0, v1, weight=1.41)
+                else:
+                    if self.dem_prohibited_mask[j, i]:
+                        continue
+                    # for dj in range(2):
+                    #     for di in range(-1, 2):
+                    for dj in range(3):
+                        for di in range(-2, 3):
+                            if di == 0 and dj == 0:
+                                continue
+                            if i + di < 0 or i + di >= self.dem_image.width or j + dj >= self.dem_image.height:
+                                continue
+                            if self.dem_prohibited_mask[j + dj, i + di]:
+                                continue
+                            if abs(di) == 2 and dj == 0 and self.dem_prohibited_mask[j + 0, i + di // 2]:
+                                continue
+                            if abs(di) == 2 and dj == 1 and self.dem_prohibited_mask[j + 0, i + di // 2] and \
+                                    self.dem_prohibited_mask[j + 1, i + di // 2]:
+                                continue
+                            if abs(di) == 1 and dj == 2 and self.dem_prohibited_mask[j + dj // 2, i + 0] and \
+                                    self.dem_prohibited_mask[j + dj // 2, i + di]:
+                                continue
+                            if abs(di) == 0 and dj == 2 and self.dem_prohibited_mask[j + 1, i + 0]:
+                                continue
+                            distance = dist(di * self.dem_resolution, dj * self.dem_resolution)
+                            v0 = self.toVertexId(i, j)
+                            v1 = self.toVertexId(i + di, j + dj)
+                            v0, v1 = min(v0, v1), max(v0, v1)
+                            self.g.add_edge(v0, v1, weight=distance)
         self.cachedPaths = {}
         print("graph prepaired!")
 
