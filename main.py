@@ -2,13 +2,11 @@ from station import load_stations
 from drone import load_drones
 from world import World
 import colors
-from mission import Mission, MissionPoly, MissionPath, splitMission
+from mission import Mission, MissionPoly, MissionPath, splitMission, load_missions
 import random
 
 import cv2
 
-def polySquare(x0, y0, w, h):
-    return [(x0, y0), (x0+w, y0), (x0+w, y0+h), (x0, y0+h)]
 
 if __name__ == '__main__':
     window_height = 1000
@@ -16,6 +14,16 @@ if __name__ == '__main__':
     world = World("data/world.json", window_height)
     control_station, charge_stations = load_stations("data/stations.json")
     drones = load_drones("data/drones.json", control_station.x, control_station.y, world)
+
+    mission_step = 250
+    mission_list = load_missions("data/missions.json", mission_step, control_station, world)
+    mission_list_split = []
+    for mission in mission_list:
+        if isinstance(mission, MissionPoly):
+            mission_list_split += splitMission(mission, 1000, 8)
+        else:
+            mission_list_split.append(mission)
+    mission_list = mission_list_split
 
     world.addDrones(drones)
     world.addStations(control_station, charge_stations)
@@ -34,15 +42,12 @@ if __name__ == '__main__':
     print("__________________________________")
 
     poly_missions = []
-    poly_missions += splitMission(MissionPoly(0, "highresCamera", polySquare(10000, 2500, 10000, 10000), 500), 1000, 8)
-    poly_missions += splitMission(MissionPoly(4, "highresCamera", [(10000, 15000), (15000, 20000), (5000, 20000)], 500), 1000, 8)
-
     path_missions = []
-    path = world.estimatePath(16000, 17000, 30*world.dem_resolution, 25*world.dem_resolution) + world.estimatePath(30 * world.dem_resolution, 25*world.dem_resolution, 16000, 17000)
-    path_missions.append(MissionPath(5, "cargo", path))
-
-    mission_list = []
-    mission_list += poly_missions
+    for mission in mission_list:
+        if isinstance(mission, MissionPath):
+            path_missions.append(mission)
+        if isinstance(mission, MissionPoly):
+            poly_missions.append(mission)
     mission_list += path_missions
 
     # mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]

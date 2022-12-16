@@ -1,4 +1,4 @@
-
+import json
 import numpy as np
 
 from utils import distbetween
@@ -142,7 +142,7 @@ def splitMission(mission, time_budget, speed):
             timespan = dist / speed
             cur_time += timespan
 
-        if cur_time > time_budget:
+        if cur_time > time_budget or i + 1 == len(mission.waypoints):
             mpart = copy.deepcopy(mission)
             mpart.waypoints = waypoint_buffer
             mpart.waypoint_visited = mask_buffer
@@ -152,3 +152,31 @@ def splitMission(mission, time_budget, speed):
             result.append(mpart)
 
     return result
+
+
+def polySquare(arr):
+    x0, y0, w, h = arr
+    return [(x0, y0), (x0+w, y0), (x0+w, y0+h), (x0, y0+h)]
+
+
+def load_missions(json_path, step, control_station, world):
+    with open(json_path, "r") as file:
+        missions_data = json.load(file)
+    assert "missions" in missions_data
+
+    missions = []
+    key = 0
+    for mission_data in missions_data["missions"]:
+        key += 1
+
+        if "destination" in mission_data:
+            destination = mission_data["destination"]
+            path = world.estimatePath(control_station.x, control_station.y, destination[0], destination[1])
+            mission = MissionPath(key, mission_data["type"], path)
+            missions.append(mission)
+        else:
+            polygon = polySquare(mission_data["rect"]) if "rect" in mission_data else mission_data["polygon"]
+            mission = MissionPoly(key, mission_data["type"], polygon, step)
+            missions.append(mission)
+
+    return missions
