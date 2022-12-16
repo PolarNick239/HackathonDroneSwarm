@@ -19,8 +19,15 @@ if __name__ == '__main__':
     window_name = "Drones Swarm Simulator"
     cv2.namedWindow(window_name, (cv2.WINDOW_AUTOSIZE if window_height < 1200 else cv2.WINDOW_NORMAL) | cv2.WINDOW_KEEPRATIO | cv2.WINDOW_GUI_NORMAL)
 
-    is_paused = False
+    is_paused = True
     steps_per_frame = 1
+
+    print("__________________________________")
+    print("Welcome to {}!".format(window_name))
+    print("Controls:")
+    print(" SPACE - pause/unpause")
+    print(" +/-   - speedup/slowdown simulation")
+    print("__________________________________")
 
     while True:
         frame = world.drawDEM()
@@ -36,7 +43,7 @@ if __name__ == '__main__':
         world.drawStations(frame)
         world.drawDrones(frame)
 
-        cv2.putText(frame, "PAUSE" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
+        cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
 
         cv2.imshow(window_name, frame)
         key = cv2.waitKey(1000//60)  # lock to 60 fps
