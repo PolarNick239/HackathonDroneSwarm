@@ -26,7 +26,8 @@ if __name__ == '__main__':
         if not is_paused:
             for step in range(steps_per_frame):
                 drone_master.tryToScheduleTask(drones)
-                for key, drone in drones.items():
+                for key in sorted(drones.keys()):
+                    drone = drones[key]
                     drone.update(world, dt)
 
         world.drawStations(frame)

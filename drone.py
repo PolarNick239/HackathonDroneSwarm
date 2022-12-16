@@ -48,8 +48,18 @@ class Drone:
         else:
             return self.targetX, self.targetY
 
-    def fly(self, dt):
-        self.x, self.y = self.predictNextPosition(dt)
+    def fly(self, world, dt):
+        nextX, nextY = self.predictNextPosition(dt)
+
+        for key, that in world.drones.items():
+            assert key == that.key
+            thatNextX, thatNextY = that.predictNextPosition(dt)
+            if isIntersects(self.x, self.y, nextX, nextY, that.x, that.y, thatNextX, thatNextY):
+                if self.key < that.key:
+                    print("Drone {}: PAUSE! Collision avoidance with Drone {}!".format(self.key, that.key))
+                    nextX, nextY = self.x, self.y
+
+        self.x, self.y = nextX, nextY
         if self.x == self.targetX and self.y == self.targetY:
             self.targetX, self.targetY = None, None
             if self.state == "flyToMission":
@@ -104,7 +114,7 @@ class Drone:
         # print('update: drone state: {}'.format(self.state))
 
         if self.state in {"flyToMission", "flyToCharge"}:
-            self.fly(dt)
+            self.fly(world, dt)
         elif self.state == "onMission":
             self.updateMission(dt)
         elif self.state == "onCharge":
