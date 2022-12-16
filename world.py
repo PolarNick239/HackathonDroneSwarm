@@ -87,7 +87,7 @@ class World:
             x, y = self.toWindowPixel(station.x, station.y)
             cv2.circle(frame, (x, y), station_radius, charge_station_color, station_thickness)
 
-    def drawWirelessNetwork(self, frame):
+    def generateWirelessNetworkSpanningTree(self):
         from scipy.sparse import csr_matrix
         from scipy.sparse.csgraph import minimum_spanning_tree
 
@@ -109,7 +109,11 @@ class World:
 
         spanning_tree_matrix = minimum_spanning_tree(matrix)
         spanning_tree_matrix = spanning_tree_matrix.toarray().astype(int)
+        return spanning_tree_matrix
 
+    def drawWirelessNetwork(self, frame):
+        spanning_tree_matrix = self.generateWirelessNetworkSpanningTree()
+        keys = sorted(self.drones.keys())
         for i0, key0 in enumerate(keys):
             drone0 = self.drones[key0]
             for i1, key1 in enumerate(keys):
@@ -119,3 +123,34 @@ class World:
                     continue
                 cv2.line(frame, self.toWindowPixel(drone0.x, drone0.y), self.toWindowPixel(drone1.x, drone1.y),
                          colors.GREEN if distance <= self.wireless_range else colors.RED)
+
+    def getWirelessReachableDrones(self, drone):
+        spanning_tree_matrix = self.generateWirelessNetworkSpanningTree()
+        keys = sorted(self.drones.keys())
+        for iStart, keyStart in enumerate(keys):
+            if keyStart != drone.key:
+                continue
+            assert keyStart == drone.key
+            is_reachable = [False] * len(keys)
+
+            is_reachable[iStart] = True
+            changes_happend = True
+            while changes_happend:
+                changes_happend = False
+                for i0, key0 in enumerate(keys):
+                    if not is_reachable[i0]:
+                        continue
+                    for i1, key1 in enumerate(keys):
+                        if is_reachable[i1]:
+                            continue
+                        distance = max(spanning_tree_matrix[i0, i1], spanning_tree_matrix[i1, i0])
+                        if distance != 0 and distance <= self.wireless_range:
+                            is_reachable[i1] = True
+                            changes_happend = True
+
+            reachable_drones = []
+            for i, key in enumerate(keys):
+                if is_reachable[i]:
+                    reachable_drones.append(self.drones[key])
+            assert drone in reachable_drones
+            return reachable_drones
