@@ -13,9 +13,9 @@ if __name__ == '__main__':
 
     world = World("data/world.json", window_height)
     control_station, charge_stations = load_stations("data/stations.json")
-    drone_master, drones = load_drones("data/drones.json", control_station.x, control_station.y, world)
+    drones = load_drones("data/drones.json", control_station.x, control_station.y, world)
 
-    world.addDrones(drone_master, drones)
+    world.addDrones(drones)
     world.addStations(control_station, charge_stations)
 
     window_name = "Drones Swarm Simulator"
@@ -47,7 +47,9 @@ if __name__ == '__main__':
 
         if not is_paused:
             for step in range(steps_per_frame):
-                drone_master.tryToScheduleTask(drones)
+                master_drone = world.getMasterDrone()
+                available_drones = world.getWirelessReachableDrones(master_drone)
+                master_drone.tryToScheduleTask(available_drones)
                 for key in sorted(drones.keys()):
                     drone = drones[key]
                     drone.update(world, dt)

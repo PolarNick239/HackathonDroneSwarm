@@ -15,8 +15,9 @@ class World:
         world_data = world_data["world"]
         self.dem_resolution = world_data["dem_resolution"]  # meters/pixel
         dem_path = world_data["dem_path"]
-        self.dem_image = Image.open(dem_path)
         self.maximum_allowed_height = world_data["maximum_allowed_height"]
+        self.dem_image = Image.open(dem_path)
+        self.dem_prohibited_mask = self.estimateProhibitedDEMMask()
         self.simulation_step = world_data["simulation_step"]  # in seconds
         self.wireless_range = world_data["wireless_range"]  # in meters
         self.drones_speed = world_data["drone_speed"]  # m/s
@@ -30,14 +31,20 @@ class World:
               .format(self.dem_image.width, self.dem_image.height,
                       int(self.dem_image.width * self.dem_resolution), int(self.dem_image.height * self.dem_resolution)))
 
-        self.drone_master = None
         self.drones = None
         self.control_station = None
         self.charge_stations = None
 
-    def addDrones(self, drone_master, drones):
-        self.drone_master = drone_master
+    def addDrones(self, drones):
         self.drones = drones
+
+    def getMasterDrone(self):
+        master_drone = None
+        for key, drone in self.drones.items():
+            if drone.is_master:
+                assert master_drone is None
+                master_drone = drone
+        return master_drone
 
     def addStations(self, control_station, charge_stations):
         self.control_station = control_station
@@ -47,10 +54,20 @@ class World:
         ratio = self.dem_image_scale_ratio / self.dem_resolution
         return int(x * ratio), int(y * ratio)
 
-    def drawDEM(self):
-        # TODO draw red zones (w.r.t. self.maximum_allowed_height)
+    def estimateProhibitedDEMMask(self):
         image = self.dem_image.convert('RGB')
         image = np.array(image)
+
+        gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        is_prohibited = gray_image > self.maximum_allowed_height
+        return is_prohibited
+
+    def drawDEM(self):
+        image = self.dem_image.convert('RGB')
+        image = np.array(image)
+
+        image[self.dem_prohibited_mask] = colors.RED
+
         image = cv2.resize(image, (self.window_width, self.window_height))
         return image
 
@@ -65,7 +82,7 @@ class World:
             x, y = self.toWindowPixel(drone.x, drone.y)
             cv2.circle(frame, (x, y), drone_radius, master_color if drone.is_master else drone_color)
 
-            text = "{} {}".format(key, drone.state)
+            text = "{} {}".format(key + ("M" if drone.is_master else ""), drone.state)
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfText = (x + 10, y)
             fontColor = colors.BLACK
@@ -115,6 +132,9 @@ class World:
         for key, station in self.charge_stations.items():
             x, y = self.toWindowPixel(station.x, station.y)
             cv2.circle(frame, (x, y), station_radius, charge_station_color, station_thickness)
+
+    # def estimatePath(self, x0, y0, x1, y1):
+
 
     def generateWirelessNetworkSpanningTree(self):
         from scipy.sparse import csr_matrix
@@ -177,9 +197,9 @@ class World:
                             is_reachable[i1] = True
                             changes_happend = True
 
-            reachable_drones = []
+            reachable_drones = {}
             for i, key in enumerate(keys):
                 if is_reachable[i]:
-                    reachable_drones.append(self.drones[key])
-            assert drone in reachable_drones
+                    reachable_drones[key] = self.drones[key]
+            assert drone in reachable_drones.values()
             return reachable_drones

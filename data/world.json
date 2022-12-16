@@ -2,7 +2,7 @@
   "world": {
     "dem_resolution": 100.0,
     "dem_path": "data/dem.png",
-    "maximum_allowed_height": 254,
+    "maximum_allowed_height": 240,
     "simulation_step": 10,
     "wireless_range": 7000,
     "drone_speed": 8.3,
