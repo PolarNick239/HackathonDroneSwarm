@@ -16,6 +16,9 @@ if __name__ == '__main__':
     world.addDrones(drone_master, drones)
     world.addStations(control_station, charge_stations)
 
+    window_name = "Drones Swarm Simulator"
+    cv2.namedWindow(window_name, (cv2.WINDOW_AUTOSIZE if window_height < 1200 else cv2.WINDOW_NORMAL) | cv2.WINDOW_KEEPRATIO | cv2.WINDOW_GUI_NORMAL)
+
     is_paused = False
     steps_per_frame = 1
 
@@ -35,7 +38,7 @@ if __name__ == '__main__':
 
         cv2.putText(frame, "PAUSE" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
 
-        cv2.imshow("Map", frame)
+        cv2.imshow(window_name, frame)
         key = cv2.waitKey(1000//60)  # lock to 60 fps
         if key == 27:  # Escape
             break
