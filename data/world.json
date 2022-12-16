@@ -5,8 +5,6 @@
     "maximum_allowed_height": 240,
     "simulation_step": 10,
     "wireless_range": 7000,
-    "drone_speed": 8.3,
-    "drone_life": 10000,
     "charge_power": 10
   }
 }

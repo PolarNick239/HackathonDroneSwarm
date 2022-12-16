@@ -22,8 +22,6 @@ class World:
         self.dem_prohibited_mask = self.estimateProhibitedDEMMask()
         self.simulation_step = world_data["simulation_step"]  # in seconds
         self.wireless_range = world_data["wireless_range"]  # in meters
-        self.drones_speed = world_data["drone_speed"]  # m/s
-        self.drone_lifetime = world_data["drone_life"]  # in seconds
         self.charge_power = world_data["charge_power"]  # in seconds of flight per second of charge
 
         self.dem_image_scale_ratio = window_height // self.dem_image.height

@@ -4,20 +4,26 @@
       "isMaster": true,
       "payload": [
         "highresCamera"
-      ]
+      ],
+      "speed" : 10,
+      "lifetime" : 10000
     },
     {
       "isMaster": false,
       "payload": [
         "highresCamera"
-      ]
+      ],
+      "speed" : 8,
+      "lifetime" : 10000
     },
     {
       "isMaster": false,
       "payload": [
         "highresCamera",
         "cargo"
-      ]
+      ],
+      "speed" : 20,
+      "lifetime" : 10000
     },
     {
       "isMaster": false,
@@ -26,7 +32,9 @@
         "3dLidar",
         "highresCamera",
         "geoRadar"
-      ]
+      ],
+      "speed" : 8,
+      "lifetime" : 10000
     },
     {
       "isMaster": false,
@@ -35,7 +43,9 @@
         "highresCamera",
         "cargo",
         "geoRadar"
-      ]
+      ],
+      "speed" : 8,
+      "lifetime" : 10000
     }
   ]
 }

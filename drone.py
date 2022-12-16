@@ -7,7 +7,7 @@ from utils import *
 
 class Drone:
 
-    def __init__(self, drone_data, start_x, start_y, speed, max_lifetime, charge_power):
+    def __init__(self, drone_data, start_x, start_y, charge_power):
         self.is_master = drone_data["isMaster"]
         self.payload = drone_data["payload"]
         self.x = start_x
@@ -18,9 +18,9 @@ class Drone:
         self.targetY = None  #TODO replace with values from mission
         self.targetMission = None
 
-        self.speed = speed
-        self.max_lifetime = max_lifetime
-        self.lifetime_left = max_lifetime
+        self.speed = drone_data["speed"]
+        self.max_lifetime = drone_data["lifetime"]
+        self.lifetime_left = drone_data["lifetime"]
         self.charge_power = charge_power
         self.mission_list = []
         self.flying = False
@@ -220,7 +220,7 @@ def load_drones(json_path, start_x, start_y, world):
     master_drone = None
     drones = {}
     for drone_data in drones_data["drones"]:
-        drone = Drone(drone_data, start_x, start_y, world.drones_speed, world.drone_lifetime, world.charge_power)
+        drone = Drone(drone_data, start_x, start_y, world.charge_power)
         if drone.is_master:
             drone.key = str(len(drones))
             assert master_drone is None
