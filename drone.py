@@ -144,7 +144,7 @@ class Drone:
     def needTask(self):
         return self.targetMission is None and self.state in {"wait"}
 
-    def addTask(self, mission: MissionPoly):
+    def addTask(self, mission):
         assert self.needTask()
 
         self.flying = True

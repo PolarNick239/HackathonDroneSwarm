@@ -32,7 +32,7 @@ if __name__ == '__main__':
     print("__________________________________")
 
     mission_list = []
-    mission_list.append(MissionPoly(0, "scan", [(5000, 5000), (15000, 5000), (10000, 10000), (5000, 10000)], 500))
+    mission_list.append(MissionPoly(0, "scan", [(10000, 5000), (20000, 5000), (15000, 10000), (10000, 10000)], 500))
     mission_list.append(MissionPoly(1, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 500))
     all_missions = [mission for mission in mission_list]
 
