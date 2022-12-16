@@ -37,17 +37,20 @@ class Drone:
         ratio = self.speed / speed
         return vx * ratio, vy * ratio
 
-    def fly(self, dt):
+    def predictNextPosition(self, dt):
         if self.targetX is None:
-            return
+            return self.x, self.y
         vx, vy = self.speedLimit(self.targetX - self.x, self.targetY - self.y)
         vx, vy = dt * vx, dt * vy
         distanceToTarget = self.distanceTo(self.targetX, self.targetY)
         if dist(vx, vy) < distanceToTarget:
-            self.x += vx
-            self.y += vy
+            return self.x + vx, self.y + vy
         else:
-            self.x, self.y = self.targetX, self.targetY
+            return self.targetX, self.targetY
+
+    def fly(self, dt):
+        self.x, self.y = self.predictNextPosition(dt)
+        if self.x == self.targetX and self.y == self.targetY:
             self.targetX, self.targetY = None, None
             if self.state == "flyToMission":
                 print("Drone {}: executing mission {}...".format(self.key, self.targetMission.key))
