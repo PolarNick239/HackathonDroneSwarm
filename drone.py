@@ -96,11 +96,11 @@ class Drone:
         assert self.state == "onMission"
         self.targetMission.update(dt)
         if self.targetMission.finished():
-            print("Drone {}: mission {} finished".format(self.key, self.targetMission.key))
+            # print("Drone {}: mission {} finished".format(self.key, self.targetMission.key))
             self.targetMission = None
             self.state = "wait"
         elif self.targetMission.hasNextWaypoint():
-            print("Drone {}: mission {} going to next waypoint".format(self.key, self.targetMission.key))
+            # print("Drone {}: mission {} going to next waypoint".format(self.key, self.targetMission.key))
             self.state = "flyToMission"
             self.targetX = self.targetMission.nextWaypoint()[0]
             self.targetY = self.targetMission.nextWaypoint()[1]

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     control_station, charge_stations = load_stations("data/stations.json")
     drones = load_drones("data/drones.json", control_station.x, control_station.y, world)
 
-    mission_step = 250
+    mission_step = 500
     mission_list = load_missions("data/missions.json", mission_step, control_station, world)
     mission_list_split = []
     for mission in mission_list:
@@ -24,6 +24,8 @@ if __name__ == '__main__':
         else:
             mission_list_split.append(mission)
     mission_list = mission_list_split
+    for i, mission in enumerate(mission_list):
+        mission.key = i+1
 
     world.addDrones(drones)
     world.addStations(control_station, charge_stations)
@@ -48,7 +50,6 @@ if __name__ == '__main__':
             path_missions.append(mission)
         if isinstance(mission, MissionPoly):
             poly_missions.append(mission)
-    mission_list += path_missions
 
     # mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]
 
