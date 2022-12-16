@@ -73,6 +73,16 @@ class World:
         image[self.dem_prohibited_mask] = colors.RED
 
         image = cv2.resize(image, (self.window_width, self.window_height))
+
+        # TODO: DELETE ME, this is just a demonstration of path planning:
+        xys = self.estimatePath(30 * self.dem_resolution, 25*self.dem_resolution, 16000, 17000)
+        for x, y in xys:
+            cv2.circle(image, self.toWindowPixel(x, y), 5, colors.BLUE)
+        for i in range(1, len(xys)):
+            x0, y0 = xys[i - 1]
+            x1, y1 = xys[i]
+            cv2.line(image, self.toWindowPixel(x0, y0), self.toWindowPixel(x1, y1), colors.BLUE)
+
         return image
 
     def drawDrones(self, frame):
