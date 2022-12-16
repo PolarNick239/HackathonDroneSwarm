@@ -1,13 +1,9 @@
 import json
 import numpy as np
 from PIL import Image
+import colors
 
 import cv2
-
-BLACK = (0, 0, 0)
-RED = (0, 0, 255)
-GREEN = (0, 255, 0)
-BLUE = (255, 0, 0)
 
 
 class World:
@@ -62,8 +58,8 @@ class World:
         self.drawWirelessNetwork(frame)
 
         drone_radius = 5
-        master_color = RED
-        drone_color = BLUE
+        master_color = colors.RED
+        drone_color = colors.BLUE
 
         for key, drone in self.drones.items():
             x, y = self.toWindowPixel(drone.x, drone.y)
@@ -72,17 +68,17 @@ class World:
             text = "{} {}".format(key, drone.state)
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfText = (x + 10, y)
-            fontColor = BLACK
+            fontColor = colors.BLACK
             fontScale, thickness, lineType = 1, 1, 2
             cv2.putText(frame, text, bottomLeftCornerOfText, font, fontScale, fontColor, thickness, lineType)
             if drone.targetX is not None:
-                cv2.line(frame, self.toWindowPixel(drone.x, drone.y), self.toWindowPixel(drone.targetX, drone.targetY), BLUE)
+                cv2.line(frame, self.toWindowPixel(drone.x, drone.y), self.toWindowPixel(drone.targetX, drone.targetY), colors.BLUE)
 
     def drawStations(self, frame):
         station_radius = 10
         station_thickness = -1
-        control_station_color = BLUE
-        charge_station_color = GREEN
+        control_station_color = colors.BLUE
+        charge_station_color = colors.GREEN
 
         x, y = self.toWindowPixel(self.control_station.x, self.control_station.y)
         cv2.circle(frame, (x, y), station_radius, control_station_color, station_thickness)
@@ -122,4 +118,4 @@ class World:
                 if distance == 0:
                     continue
                 cv2.line(frame, self.toWindowPixel(drone0.x, drone0.y), self.toWindowPixel(drone1.x, drone1.y),
-                         GREEN if distance <= self.wireless_range else RED)
+                         colors.GREEN if distance <= self.wireless_range else colors.RED)

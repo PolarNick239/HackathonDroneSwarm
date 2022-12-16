@@ -45,17 +45,30 @@ class Drone:
         ratio = self.speed / speed
         return vx * ratio, vy * ratio
 
-    def fly(self, dt):
+    def predictNextPosition(self, dt):
         if self.targetX is None:
-            return
+            return self.x, self.y
         vx, vy = self.speedLimit(self.targetX - self.x, self.targetY - self.y)
         vx, vy = dt * vx, dt * vy
         distanceToTarget = self.distanceTo(self.targetX, self.targetY)
         if dist(vx, vy) < distanceToTarget:
-            self.x += vx
-            self.y += vy
+            return self.x + vx, self.y + vy
         else:
-            self.x, self.y = self.targetX, self.targetY
+            return self.targetX, self.targetY
+
+    def fly(self, world, dt):
+        nextX, nextY = self.predictNextPosition(dt)
+
+        for key, that in world.drones.items():
+            assert key == that.key
+            thatNextX, thatNextY = that.predictNextPosition(dt)
+            if isIntersects(self.x, self.y, nextX, nextY, that.x, that.y, thatNextX, thatNextY):
+                if self.key < that.key:
+                    print("Drone {}: PAUSE! Collision avoidance with Drone {}!".format(self.key, that.key))
+                    nextX, nextY = self.x, self.y
+
+        self.x, self.y = nextX, nextY
+        if self.x == self.targetX and self.y == self.targetY:
             self.targetX, self.targetY = None, None
             if self.state == "flyToMission":
                 print("Drone {}: executing mission {}...".format(self.key, self.targetMission.key))
@@ -110,7 +123,7 @@ class Drone:
         # print('Drone {}: update: drone state: {}, target mission: {}'.format(self.key, self.state, self.targetMission))
 
         if self.state in {"flyToMission", "flyToCharge"}:
-            self.fly(dt)
+            self.fly(world, dt)
         elif self.state == "onMission":
             self.updateMission(dt)
         elif self.state == "onCharge":

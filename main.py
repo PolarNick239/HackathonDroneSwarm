@@ -1,6 +1,7 @@
 from station import load_stations
 from drone import load_drones
 from world import World
+import colors
 from mission import Mission
 import random
 
@@ -17,6 +18,19 @@ if __name__ == '__main__':
     world.addDrones(drone_master, drones)
     world.addStations(control_station, charge_stations)
 
+    window_name = "Drones Swarm Simulator"
+    cv2.namedWindow(window_name, (cv2.WINDOW_AUTOSIZE if window_height < 1200 else cv2.WINDOW_NORMAL) | cv2.WINDOW_KEEPRATIO | cv2.WINDOW_GUI_NORMAL)
+
+    is_paused = True
+    steps_per_frame = 1
+
+    print("__________________________________")
+    print("Welcome to {}!".format(window_name))
+    print("Controls:")
+    print(" SPACE - pause/unpause")
+    print(" +/-   - speedup/slowdown simulation")
+    print("__________________________________")
+
     mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]
 
     for key, drone in drones.items():
@@ -26,15 +40,36 @@ if __name__ == '__main__':
         frame = world.drawDEM()
         dt = world.simulation_step
 
-        drone_master.tryToScheduleTask(drones)
-        for key, drone in drones.items():
-            drone.update(world, dt)
+        if not is_paused:
+            for step in range(steps_per_frame):
+                drone_master.tryToScheduleTask(drones)
+                for key in sorted(drones.keys()):
+                    drone = drones[key]
+                    drone.update(world, dt)
 
         world.drawStations(frame)
         world.drawDrones(frame)
 
-        cv2.imshow("Map", frame)
+        cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
+
+        cv2.imshow(window_name, frame)
         key = cv2.waitKey(1000//60)  # lock to 60 fps
         if key == 27:  # Escape
             break
+        elif key == 32:  # Space bar
+            if not is_paused:
+                is_paused = True
+                print("GUI: Paused!")
+            else:
+                is_paused = False
+                print("GUI: Un-paused!")
+        elif key == 43:  # +
+            steps_per_frame *= 2
+            print("GUI: speedup to x{} steps per frame".format(steps_per_frame))
+        elif key == 45:  # -
+            if steps_per_frame != 1:
+                steps_per_frame = max(1, steps_per_frame // 2)
+                print("GUI: slow down to x{} steps per frame".format(steps_per_frame))
+        elif key != -1:
+            print("GUI: Unhandled key: {}".format(key))
     cv2.destroyAllWindows()
