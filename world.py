@@ -74,6 +74,35 @@ class World:
             if drone.targetX is not None:
                 cv2.line(frame, self.toWindowPixel(drone.x, drone.y), self.toWindowPixel(drone.targetX, drone.targetY), colors.BLUE)
 
+    def drawPolygonMissions(self, frame, missions):
+
+        waypoint_radius = 2
+        waypoint_thickness = 2
+
+        for mission in missions:
+            polygon = mission.polygon
+            n = len(polygon)
+            for i in range(n):
+                j = (i+1)%n
+                x0 = polygon[i][0]
+                y0 = polygon[i][1]
+                x1 = polygon[j][0]
+                y1 = polygon[j][1]
+                cv2.line(frame, self.toWindowPixel(x0, y0), self.toWindowPixel(x1, y1), colors.CYAN)
+
+            for i, waypoint in enumerate(mission.waypoints):
+
+                x, y = self.toWindowPixel(waypoint[0], waypoint[1])
+                color = colors.CYAN if mission.waypoint_visited[i] else colors.YELLOW
+
+                if i > 0:
+                    xprev, yprev = self.toWindowPixel(mission.waypoints[i-1][0], mission.waypoints[i-1][1])
+                    cv2.line(frame, (xprev, yprev), (x, y), color)
+
+                cv2.circle(frame, (x, y), waypoint_radius, color, waypoint_thickness)
+
+
+
     def drawStations(self, frame):
         station_radius = 10
         station_thickness = -1

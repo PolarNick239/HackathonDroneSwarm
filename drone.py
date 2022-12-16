@@ -1,7 +1,7 @@
 import json
 import random
 
-from mission import Mission
+from mission import Mission, MissionPoly
 from utils import *
 
 
@@ -82,11 +82,16 @@ class Drone:
 
     def updateMission(self, dt):
         assert self.state == "onMission"
-        self.targetMission.time_to_finish_left = max(0, self.targetMission.time_to_finish_left - dt)
-        if self.targetMission.time_to_finish_left == 0:
+        self.targetMission.update(dt)
+        if self.targetMission.finished():
             print("Drone {}: mission {} finished".format(self.key, self.targetMission.key))
             self.targetMission = None
             self.state = "wait"
+        elif self.targetMission.hasNextWaypoint():
+            print("Drone {}: mission {} going to next waypoint".format(self.key, self.targetMission.key))
+            self.state = "flyToMission"
+            self.targetX = self.targetMission.nextWaypoint()[0]
+            self.targetY = self.targetMission.nextWaypoint()[1]
 
     def updateCharge(self, dt):
         assert self.state == "onCharge"
@@ -139,15 +144,15 @@ class Drone:
     def needTask(self):
         return self.targetMission is None and self.state in {"wait"}
 
-    def addTask(self, mission: Mission):
+    def addTask(self, mission: MissionPoly):
         assert self.needTask()
 
         self.flying = True
         self.targetMission = mission
         if self.state in {"wait"}:
             self.state = "flyToMission"
-            self.targetX = mission.x
-            self.targetY = mission.y
+            self.targetX = mission.nextWaypoint()[0]
+            self.targetY = mission.nextWaypoint()[1]
 
     def selectBestMission(self, drone):
         dist = None
