@@ -171,8 +171,8 @@ def load_missions(json_path, step, control_station, world):
 
         if "destination" in mission_data:
             destination = mission_data["destination"]
-            path = world.estimatePath(control_station.x, control_station.y, destination[0], destination[1])
-            mission = MissionPath(key, mission_data["type"], path)
+            # path = world.estimatePath(control_station.x, control_station.y, destination[0], destination[1])
+            mission = MissionPath(key, mission_data["type"], [destination])
             missions.append(mission)
         else:
             polygon = polySquare(mission_data["rect"]) if "rect" in mission_data else mission_data["polygon"]

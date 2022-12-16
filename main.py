@@ -63,7 +63,7 @@ if __name__ == '__main__':
             for step in range(steps_per_frame):
                 master_drone = world.getMasterDrone()
                 available_drones = world.getWirelessReachableDrones(master_drone)
-                master_drone.tryToScheduleTasks(available_drones, charge_stations)
+                master_drone.tryToScheduleTasks(available_drones, charge_stations, world)
                 for key in sorted(drones.keys()):
                     drone = drones[key]
                     drone.update(world, dt)

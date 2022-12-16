@@ -1,7 +1,7 @@
 import json
 import random
 
-from mission import Mission, MissionPoly
+from mission import Mission, MissionPoly, MissionPath
 from utils import *
 
 
@@ -17,6 +17,7 @@ class Drone:
         self.targetX = None  #TODO replace with values from mission
         self.targetY = None  #TODO replace with values from mission
         self.targetMission = None
+        self.pathPlannerMission = None
 
         self.speed = drone_data["speed"]
         self.max_lifetime = drone_data["lifetime"]
@@ -70,6 +71,17 @@ class Drone:
         self.x, self.y = nextX, nextY
         if self.x == self.targetX and self.y == self.targetY:
             self.targetX, self.targetY = None, None
+
+            if self.pathPlannerMission is not None:
+                self.pathPlannerMission.update(dt)
+                if self.pathPlannerMission.finished():
+                    self.pathPlannerMission = None
+                elif self.pathPlannerMission.hasNextWaypoint():
+                    self.targetX = self.pathPlannerMission.nextWaypoint()[0]
+                    self.targetY = self.pathPlannerMission.nextWaypoint()[1]
+            if self.pathPlannerMission is not None:
+                return
+
             if self.state == "flyToMission":
                 print("Drone {}: executing mission {}...".format(self.key, self.targetMission.key))
                 self.state = "onMission"
@@ -114,7 +126,7 @@ class Drone:
                 smallest_time_to_reach = time_to_reach
         return closest_station, smallest_time_to_reach
 
-    def checkIfBatteryIsLow(self, charge_stations):
+    def checkIfBatteryIsLow(self, charge_stations, world):
         closest_station, smallest_time_to_reach = self.timeToClosestChargeStationFrom(self.x, self.y, charge_stations)
 
         if smallest_time_to_reach >= self.lifetime_left:
@@ -123,12 +135,15 @@ class Drone:
             if self.targetMission is not None:
                 self.mission_list.append(self.targetMission)
                 self.targetMission = None
-            # TODO make task as well?
-            self.targetX, self.targetY = closest_station.x, closest_station.y
+
+            path = world.estimatePath(self.x, self.y, closest_station.x, closest_station.y)
+            self.pathPlannerMission = MissionPath(0, "", path)
+            self.targetX = self.pathPlannerMission.nextWaypoint()[0]
+            self.targetY = self.pathPlannerMission.nextWaypoint()[1]
 
     def update(self, world, dt):
         if self.state not in {"flyToCharge", "onCharge"}:
-            self.checkIfBatteryIsLow(world.charge_stations)
+            self.checkIfBatteryIsLow(world.charge_stations, world)
 
         # print('Drone {}: update: drone state: {}, target mission: {}'.format(self.key, self.state, self.targetMission))
 
@@ -149,7 +164,7 @@ class Drone:
     def needTask(self):
         return self.targetMission is None and self.state in {"wait"}
 
-    def addTask(self, mission):
+    def addTask(self, mission, world):
         assert self.needTask()
 
         print("Drone {}: new mission {}".format(self.key, mission.key))
@@ -157,10 +172,13 @@ class Drone:
         self.targetMission = mission
         if self.state in {"wait"}:
             self.state = "flyToMission"
-            self.targetX = mission.nextWaypoint()[0]
-            self.targetY = mission.nextWaypoint()[1]
 
-    def tryToScheduleTasks(self, available_drones, charge_stations):
+            path = world.estimatePath(self.x, self.y, mission.nextWaypoint()[0], mission.nextWaypoint()[1])
+            self.pathPlannerMission = MissionPath(0, "", path)
+            self.targetX = self.pathPlannerMission.nextWaypoint()[0]
+            self.targetY = self.pathPlannerMission.nextWaypoint()[1]
+
+    def tryToScheduleTasks(self, available_drones, charge_stations, world):
         assert self.is_master
 
         # This is an algorithm similar to Hungarian algorithm - https://en.wikipedia.org/wiki/Hungarian_algorithm
@@ -208,7 +226,7 @@ class Drone:
                         win_j, win_i, win_cost = j, i, cost
             if win_j != -1 and win_i != -1:
                 mission = missions[win_i]
-                drones[win_j].addTask(mission)
+                drones[win_j].addTask(mission, world)
                 self.mission_list.remove(mission)
                 progress = True
 

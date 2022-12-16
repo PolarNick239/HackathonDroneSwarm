@@ -11,6 +11,10 @@
       "rect": [13000, 5000, 7500, 7500]
     },
     {
+      "type": "highresCamera",
+      "rect": [2800, 4800, 2000, 1000]
+    },
+    {
       "type" : "cargo",
       "destination" : [3000, 2500]
     }
