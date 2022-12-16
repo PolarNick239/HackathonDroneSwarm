@@ -62,12 +62,9 @@ class World:
         master_color = RED
         drone_color = BLUE
 
-        x, y = self.toWindowPixel(self.drone_master.x, self.drone_master.y)
-        cv2.circle(frame, (x, y), drone_radius, master_color)
-
         for key, drone in self.drones.items():
             x, y = self.toWindowPixel(drone.x, drone.y)
-            cv2.circle(frame, (x, y), drone_radius, drone_color)
+            cv2.circle(frame, (x, y), drone_radius, master_color if drone.is_master else drone_color)
 
             text = "{} {}".format(key, drone.state)
             font = cv2.FONT_HERSHEY_SIMPLEX
