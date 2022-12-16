@@ -1,6 +1,7 @@
 
 import numpy as np
 
+from utils import distbetween
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
@@ -75,6 +76,19 @@ class MissionPoly:
     def nextWaypoint(self):
         return self.waypoints[self.n_waypoints_visited]
 
+    def getFirstWaypoint(self):
+        return self.waypoints[0]
+
+    def getLastWaypoint(self):
+        return self.waypoints[-1]
+
+    def getTotalLength(self):
+        length = 0.0
+        for i in range(1, len(self.waypoints)):
+            x0, y0 = self.waypoints[i - 1]
+            x1, y1 = self.waypoints[i]
+            length += distbetween(x0, y0, x1, y1)
+        return length
 
 
 class MissionPath:
@@ -98,6 +112,20 @@ class MissionPath:
 
     def nextWaypoint(self):
         return self.waypoints[self.n_waypoints_visited]
+
+    def getFirstWaypoint(self):
+        return self.waypoints[0]
+
+    def getLastWaypoint(self):
+        return self.waypoints[-1]
+
+    def getTotalLength(self):
+        length = 0.0
+        for i in range(1, len(self.waypoints)):
+            x0, y0 = self.waypoints[i - 1]
+            x1, y1 = self.waypoints[i]
+            length += distbetween(x0, y0, x1, y1)
+        return length
 
 
 def splitMission(mission, time_budget, speed):

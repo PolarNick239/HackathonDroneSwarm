@@ -58,7 +58,7 @@ if __name__ == '__main__':
             for step in range(steps_per_frame):
                 master_drone = world.getMasterDrone()
                 available_drones = world.getWirelessReachableDrones(master_drone)
-                master_drone.tryToScheduleTask(available_drones)
+                master_drone.tryToScheduleTasks(available_drones, charge_stations)
                 for key in sorted(drones.keys()):
                     drone = drones[key]
                     drone.update(world, dt)
@@ -89,5 +89,6 @@ if __name__ == '__main__':
                 steps_per_frame = max(1, steps_per_frame // 2)
                 print("GUI: slow down to x{} steps per frame".format(steps_per_frame))
         elif key != -1:
-            print("GUI: Unhandled key: {}".format(key))
+            # print("GUI: Unhandled key: {}".format(key))
+            pass
     cv2.destroyAllWindows()
