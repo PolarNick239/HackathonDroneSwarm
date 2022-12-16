@@ -183,7 +183,7 @@ def load_drones(json_path, start_x, start_y, world):
     for drone_data in drones_data["drones"]:
         drone = Drone(drone_data, start_x, start_y, world.drones_speed, world.drone_lifetime, world.charge_power)
         if drone.is_master:
-            drone.key = "Master"
+            drone.key = str(len(drones))
             assert master_drone is None
             master_drone = drone
         else:
@@ -193,4 +193,4 @@ def load_drones(json_path, start_x, start_y, world):
     assert master_drone is not None
     assert len(drones) >= 2
     print("1+{} drones loaded".format(len(drones) - 1))
-    return master_drone, drones
+    return drones

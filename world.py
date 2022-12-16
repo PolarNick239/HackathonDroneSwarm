@@ -30,14 +30,20 @@ class World:
               .format(self.dem_image.width, self.dem_image.height,
                       int(self.dem_image.width * self.dem_resolution), int(self.dem_image.height * self.dem_resolution)))
 
-        self.drone_master = None
         self.drones = None
         self.control_station = None
         self.charge_stations = None
 
-    def addDrones(self, drone_master, drones):
-        self.drone_master = drone_master
+    def addDrones(self, drones):
         self.drones = drones
+
+    def getMasterDrone(self):
+        master_drone = None
+        for key, drone in self.drones.items():
+            if drone.is_master:
+                assert master_drone is None
+                master_drone = drone
+        return master_drone
 
     def addStations(self, control_station, charge_stations):
         self.control_station = control_station
@@ -65,7 +71,7 @@ class World:
             x, y = self.toWindowPixel(drone.x, drone.y)
             cv2.circle(frame, (x, y), drone_radius, master_color if drone.is_master else drone_color)
 
-            text = "{} {}".format(key, drone.state)
+            text = "{} {}".format(key + ("M" if drone.is_master else ""), drone.state)
             font = cv2.FONT_HERSHEY_SIMPLEX
             bottomLeftCornerOfText = (x + 10, y)
             fontColor = colors.BLACK
@@ -148,9 +154,9 @@ class World:
                             is_reachable[i1] = True
                             changes_happend = True
 
-            reachable_drones = []
+            reachable_drones = {}
             for i, key in enumerate(keys):
                 if is_reachable[i]:
-                    reachable_drones.append(self.drones[key])
-            assert drone in reachable_drones
+                    reachable_drones[key] = self.drones[key]
+            assert drone in reachable_drones.values()
             return reachable_drones
