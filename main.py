@@ -69,9 +69,9 @@ if __name__ == '__main__':
                     drone.update(world, dt)
 
         world.drawStations(frame)
-        world.drawDrones(frame)
         world.drawPolygonMissions(frame, poly_missions) #TODO move to world?
         world.drawPathMissions(frame, path_missions) #TODO move to world?
+        world.drawDrones(frame)
 
         cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
 
