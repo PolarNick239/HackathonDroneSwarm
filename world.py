@@ -314,7 +314,7 @@ class World:
 
             reachable_drones = {}
             for i, key in enumerate(keys):
-                if is_reachable[i]:
+                if is_reachable[i] or (self.drones[key].x, self.drones[key].y) == (drone.x, drone.y):
                     reachable_drones[key] = self.drones[key]
             assert drone in reachable_drones.values()
             return reachable_drones
