@@ -4,6 +4,10 @@ import numpy as np
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 
+from utils import distbetween
+
+import copy
+
 class Mission:
 
     def __init__(self, key, total_time, x, y):
@@ -94,3 +98,29 @@ class MissionPath:
 
     def nextWaypoint(self):
         return self.waypoints[self.n_waypoints_visited]
+
+
+def splitMission(mission, time_budget, speed):
+    result = []
+
+    waypoint_buffer = []
+    mask_buffer = []
+    cur_time = 0
+    for i, wp in enumerate(mission.waypoints):
+        waypoint_buffer.append(wp)
+        mask_buffer.append(mission.waypoint_visited[i])
+        if i > 0:
+            dist = distbetween(wp[0], wp[1], mission.waypoints[i-1][0], mission.waypoints[i-1][1])
+            timespan = dist / speed
+            cur_time += timespan
+
+        if cur_time > time_budget:
+            mpart = copy.deepcopy(mission)
+            mpart.waypoints = waypoint_buffer
+            mpart.waypoint_visited = mask_buffer
+            waypoint_buffer = []
+            mask_buffer = []
+            cur_time = 0
+            result.append(mpart)
+
+    return result

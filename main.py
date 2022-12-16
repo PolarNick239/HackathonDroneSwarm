@@ -2,14 +2,13 @@ from station import load_stations
 from drone import load_drones
 from world import World
 import colors
-from mission import Mission, MissionPoly, MissionPath
+from mission import Mission, MissionPoly, MissionPath, splitMission
 import random
 
 import cv2
 
-def polySquare(dx, dy):
-    f = 0.75
-    return [(10000*f+dx*f, 5000*f+dy*f), (15000*f+dx*f, 5000*f+dy*f), (15000*f+dx*f, 10000*f+dy*f), (10000*f+dx*f, 10000*f+dy*f)]
+def polySquare(x0, y0, w, h):
+    return [(x0, y0), (x0+w, y0), (x0+w, y0+h), (x0, y0+h)]
 
 if __name__ == '__main__':
     window_height = 1000
@@ -35,11 +34,8 @@ if __name__ == '__main__':
     print("__________________________________")
 
     poly_missions = []
-    poly_missions.append(MissionPoly(0, "scan", polySquare(5000, 0), 500))
-    poly_missions.append(MissionPoly(1, "scan", polySquare(10000, 5000), 500))
-    poly_missions.append(MissionPoly(2, "scan", polySquare(5000, 5000), 500))
-    poly_missions.append(MissionPoly(3, "scan", polySquare(10000, 0), 500))
-    poly_missions.append(MissionPoly(4, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 1000))
+    poly_missions += splitMission(MissionPoly(0, "scan", polySquare(10000, 2500, 10000, 10000), 500), 1000, 8)
+    poly_missions += splitMission(MissionPoly(4, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 500), 1000, 8)
 
     path_missions = []
     path = world.estimatePath(16000, 17000, 30*world.dem_resolution, 25*world.dem_resolution) + world.estimatePath(30 * world.dem_resolution, 25*world.dem_resolution, 16000, 17000)
