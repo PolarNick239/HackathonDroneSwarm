@@ -4,6 +4,7 @@
     "dem_path": "data/dem.png",
     "maximum_allowed_height": 254,
     "simulation_step": 10,
+    "wireless_range": 7000,
     "drone_speed": 8.3,
     "drone_life": 5000,
     "charge_power": 10

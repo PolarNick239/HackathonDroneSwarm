@@ -146,7 +146,7 @@ def load_drones(json_path, start_x, start_y, world):
             assert master_drone is None
             master_drone = drone
         else:
-            key = len(drones)
+            key = str(len(drones))
             drone.key = key
         drones[drone.key] = drone
     assert master_drone is not None
