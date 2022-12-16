@@ -223,9 +223,9 @@ class World:
 
         key = (startId, finishId)
         if key in self.cachedPaths:
-            xys = self.cachedPaths[key]
-            assert xys[0] == start
-            assert xys[-1] == finish
+            xys = self.cachedPaths[key].copy()
+            xys[0] = start
+            xys[-1] = finish
             return xys
 
         vertices = nx.shortest_path(self.g, source=startId, target=finishId, weight='weight')
