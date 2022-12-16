@@ -1,7 +1,7 @@
 {
   "missions": [
     {
-      "type": "highresCamera",
+      "type": "agro",
       "polygon": [
         [5000, 7500], [7500, 12500], [10000, 7500]
       ]

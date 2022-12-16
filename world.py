@@ -108,7 +108,8 @@ class World:
                 y0 = polygon[i][1]
                 x1 = polygon[j][0]
                 y1 = polygon[j][1]
-                cv2.line(frame, self.toWindowPixel(x0, y0), self.toWindowPixel(x1, y1), colors.CYAN)
+                color = colors.GREEN if mission.type == "agro" else colors.CYAN
+                cv2.line(frame, self.toWindowPixel(x0, y0), self.toWindowPixel(x1, y1), color, 3)
 
             for i, waypoint in enumerate(mission.waypoints):
 
