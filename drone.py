@@ -169,14 +169,25 @@ class Drone:
 
     def tryToScheduleTask(self, drones):
         assert self.is_master
-        for key, drone in drones.items():
-            if not drone.needTask():
+
+        drone_mission_pairs = []
+
+        for mission in self.mission_list:
+            if not mission.hasNextWaypoint():
                 continue
-            # mission = Mission(key, 1000, random.random() * 22500, random.random() * 22500)
-            mission = self.selectBestMission(drone)
-            if mission is None:
+            waypoint = mission.nextWaypoint()
+            for _, drone in drones.items():
+                if not drone.needTask():
+                    continue
+
+                dist = distbetween(drone.x, drone.y, waypoint[0], waypoint[1])
+                drone_mission_pairs.append((dist, drone, mission))
+
+        for _, drone, mission in sorted(drone_mission_pairs, key=lambda a: a[0]):
+            if not drone.needTask() or mission not in self.mission_list:
                 continue
             drone.addTask(mission)
+            self.mission_list.remove(mission)
 
 
 def load_drones(json_path, start_x, start_y, world):

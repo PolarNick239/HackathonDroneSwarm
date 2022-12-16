@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
     path_missions = []
     path = world.estimatePath(16000, 17000, 30*world.dem_resolution, 25*world.dem_resolution) + world.estimatePath(30 * world.dem_resolution, 25*world.dem_resolution, 16000, 17000)
-    path_missions.append(MissionPath(2, "path", path))
+    path_missions.append(MissionPath(5, "path", path))
 
     mission_list = []
     mission_list += poly_missions
