@@ -2,6 +2,8 @@ import json
 import numpy as np
 from PIL import Image
 import colors
+import networkx as nx
+from utils import dist, simplifyPath
 
 import cv2
 
@@ -34,6 +36,8 @@ class World:
         self.drones = None
         self.control_station = None
         self.charge_stations = None
+
+        self.prepairPathPlanning()
 
     def addDrones(self, drones):
         self.drones = drones
@@ -133,8 +137,92 @@ class World:
             x, y = self.toWindowPixel(station.x, station.y)
             cv2.circle(frame, (x, y), station_radius, charge_station_color, station_thickness)
 
-    # def estimatePath(self, x0, y0, x1, y1):
+    def toVertexId(self, i, j):
+        return j * self.dem_image.width + i
 
+    def fromVertexId(self, vertexId):
+        i = vertexId % self.dem_image.width
+        j = vertexId // self.dem_image.width
+        return i, j
+
+    def prepairPathPlanning(self):
+        nvertices = self.dem_image.width * self.dem_image.height
+        print("building {} vertices graph w.r.t. DEM...".format(nvertices))
+        self.g = nx.Graph()
+        for j in range(self.dem_image.height - 1):
+            for i in range(self.dem_image.width - 1):
+                if self.dem_prohibited_mask[j, i]:
+                    continue
+                # for dj in range(2):
+                #     for di in range(-1, 2):
+                for dj in range(3):
+                    for di in range(-2, 3):
+                        if di == 0 and dj == 0:
+                            continue
+                        if i + di < 0 or i + di >= self.dem_image.width or j + dj >= self.dem_image.height:
+                            continue
+                        if self.dem_prohibited_mask[j + dj, i + di]:
+                            continue
+                        if abs(di) == 2 and dj == 0 and self.dem_prohibited_mask[j + 0, i + di // 2]:
+                            continue
+                        if abs(di) == 2 and dj == 1 and self.dem_prohibited_mask[j + 0, i + di // 2] and \
+                                self.dem_prohibited_mask[j + 1, i + di // 2]:
+                            continue
+                        if abs(di) == 1 and dj == 2 and self.dem_prohibited_mask[j + dj // 2, i + 0] and \
+                                self.dem_prohibited_mask[j + dj // 2, i + di]:
+                            continue
+                        if abs(di) == 0 and dj == 2 and self.dem_prohibited_mask[j + 1, i + 0]:
+                            continue
+                        distance = dist(di * self.dem_resolution, dj * self.dem_resolution)
+                        v0 = self.toVertexId(i, j)
+                        v1 = self.toVertexId(i + di, j + dj)
+                        v0, v1 = min(v0, v1), max(v0, v1)
+                        self.g.add_edge(v0, v1, weight=distance)
+        self.cachedPaths = {}
+        print("graph prepaired!")
+
+    def estimatePath(self, x0, y0, x1, y1):
+        start = (x0, y0)
+        finish = (x1, y1)
+
+        # to DEM image pixels coordinates:
+        x0, y0 = x0 // self.dem_resolution, y0 // self.dem_resolution
+        x1, y1 = x1 // self.dem_resolution, y1 // self.dem_resolution
+        assert x0 >= 0 and x0 < self.dem_image.width and x1 >= 0 and x1 < self.dem_image.width
+        assert y0 >= 0 and y0 < self.dem_image.height and y1 >= 0 and y1 < self.dem_image.height
+
+        startId = self.toVertexId(x0, y0)
+        finishId = self.toVertexId(x1, y1)
+
+        key = (startId, finishId)
+        if key in self.cachedPaths:
+            xys = self.cachedPaths[key]
+            assert xys[0] == start
+            assert xys[-1] == finish
+            return xys
+
+        vertices = nx.shortest_path(self.g, source=startId, target=finishId, weight='weight')
+        assert vertices[0] == startId
+        assert vertices[-1] == finishId
+
+        xys = []
+        for curId in vertices:
+            i, j = self.fromVertexId(curId)
+            if curId == startId:
+                x, y = start
+            elif curId == finishId:
+                x, y = finish
+            else:
+                x, y = (i + 0.5) * self.dem_resolution, (j + 0.5) * self.dem_resolution
+            xys.append((x, y))
+        assert xys[0] == start
+        assert xys[-1] == finish
+        max_error = (self.dem_resolution / 4.0)
+        xys = simplifyPath(xys, max_error)
+        assert xys[0] == start
+        assert xys[-1] == finish
+        self.cachedPaths[key] = xys
+        return xys
 
     def generateWirelessNetworkSpanningTree(self):
         from scipy.sparse import csr_matrix

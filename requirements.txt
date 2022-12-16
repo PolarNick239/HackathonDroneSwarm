@@ -1,5 +1,6 @@
 opencv-python
 numpy
 scipy
+networkx
 Pillow
 shapely
