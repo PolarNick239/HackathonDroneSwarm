@@ -8,7 +8,8 @@ import random
 import cv2
 
 def polySquare(dx, dy):
-    return [(10000+dx, 5000+dy), (15000+dx, 5000+dy), (15000+dx, 10000+dy), (10000+dx, 10000+dy)]
+    f = 0.75
+    return [(10000*f+dx*f, 5000*f+dy*f), (15000*f+dx*f, 5000*f+dy*f), (15000*f+dx*f, 10000*f+dy*f), (10000*f+dx*f, 10000*f+dy*f)]
 
 if __name__ == '__main__':
     window_height = 1000
@@ -34,10 +35,10 @@ if __name__ == '__main__':
     print("__________________________________")
 
     poly_missions = []
-    poly_missions.append(MissionPoly(0, "scan", polySquare(0, 0), 1000))
-    poly_missions.append(MissionPoly(1, "scan", polySquare(5000, 5000), 1000))
-    poly_missions.append(MissionPoly(2, "scan", polySquare(0, 5000), 1000))
-    poly_missions.append(MissionPoly(3, "scan", polySquare(5000, 0), 1000))
+    poly_missions.append(MissionPoly(0, "scan", polySquare(5000, 0), 500))
+    poly_missions.append(MissionPoly(1, "scan", polySquare(10000, 5000), 500))
+    poly_missions.append(MissionPoly(2, "scan", polySquare(5000, 5000), 500))
+    poly_missions.append(MissionPoly(3, "scan", polySquare(10000, 0), 500))
     poly_missions.append(MissionPoly(4, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 1000))
 
     path_missions = []
