@@ -6,7 +6,7 @@
     "simulation_step": 10,
     "wireless_range": 7000,
     "drone_speed": 8.3,
-    "drone_life": 5000,
+    "drone_life": 10000,
     "charge_power": 10
   }
 }

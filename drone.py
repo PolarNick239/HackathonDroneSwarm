@@ -22,8 +22,16 @@ class Drone:
         self.max_lifetime = max_lifetime
         self.lifetime_left = max_lifetime
         self.charge_power = charge_power
+        self.mission_list = []
+        self.flying = False
 
         self.state = "wait"
+
+    # now one object shared between all drones
+    # TODO only master holds mission list, other drones request updates over network
+    def setMissionList(self, mission_list):
+        self.mission_list = mission_list
+
 
     def distanceTo(self, x, y):
         return dist(x - self.x, y - self.y)
@@ -55,6 +63,7 @@ class Drone:
             elif self.state == "flyToCharge":
                 print("Drone {}: on charge...".format(self.key))
                 self.state = "onCharge"
+                self.flying = False
             else:
                 raise Exception("fly(): state={} is incorrect!".format(self.state))
 
@@ -75,10 +84,7 @@ class Drone:
                 print("Drone {}: charged! waiting...".format(self.key))
                 self.state = "wait"
             else:
-                print("Drone {}: charged! continue mission {}".format(self.key, self.targetMission.key))
-                self.state = "flyToMission"
-                self.targetX = self.targetMission.x
-                self.targetY = self.targetMission.y
+                raise Exception("this branch should not be touched")
 
     def checkIfBatteryIsLow(self, charge_stations):
         closest_station = None
@@ -91,6 +97,9 @@ class Drone:
         if self.lifetime_left < 2 * smallest_time_to_reach:
             print("Drone {}: low battery, flying to station {}".format(self.key, closest_station.key))
             self.state = "flyToCharge"
+            if self.targetMission is not None:
+                self.mission_list.append(self.targetMission)
+                self.targetMission = None
             #TODO make task as well?
             self.targetX, self.targetY = closest_station.x, closest_station.y
 
@@ -98,7 +107,7 @@ class Drone:
         if self.state not in {"flyToCharge", "onCharge"}:
             self.checkIfBatteryIsLow(world.charge_stations)
 
-        # print('update: drone state: {}'.format(self.state))
+        # print('Drone {}: update: drone state: {}, target mission: {}'.format(self.key, self.state, self.targetMission))
 
         if self.state in {"flyToMission", "flyToCharge"}:
             self.fly(dt)
@@ -110,26 +119,45 @@ class Drone:
             pass  # TODO we can fly into the center of area (or closer to the charge station/go to charge if we have less than 50% battery)
         else:
             raise Exception("state={} is incorrect!".format(self.state))
-        self.lifetime_left -= dt
+
+        if self.flying:
+            self.lifetime_left -= dt
 
     def needTask(self):
-        return self.targetMission is None and self.state in {"wait", "flyToCharge", "onCharge"}
+        return self.targetMission is None and self.state in {"wait"}
 
     def addTask(self, mission: Mission):
         assert self.needTask()
 
+        self.flying = True
         self.targetMission = mission
         if self.state in {"wait"}:
             self.state = "flyToMission"
             self.targetX = mission.x
             self.targetY = mission.y
 
+    def selectBestMission(self, drone):
+        dist = None
+        result = None
+        for mission in self.mission_list:
+            # TODO mission type check
+            if dist is None or distbetween(mission.x, mission.y, drone.x, drone.y) < dist:
+                result = mission
+
+        if result is not None:
+            self.mission_list.remove(result)
+
+        return result
+
     def tryToScheduleTask(self, drones):
         assert self.is_master
         for key, drone in drones.items():
             if not drone.needTask():
                 continue
-            mission = Mission(key, 1000, random.random() * 22500, random.random() * 22500)
+            # mission = Mission(key, 1000, random.random() * 22500, random.random() * 22500)
+            mission = self.selectBestMission(drone)
+            if mission is None:
+                continue
             drone.addTask(mission)
 
 

@@ -1,6 +1,8 @@
 from station import load_stations
 from drone import load_drones
 from world import World
+from mission import Mission
+import random
 
 import cv2
 
@@ -14,6 +16,11 @@ if __name__ == '__main__':
 
     world.addDrones(drone_master, drones)
     world.addStations(control_station, charge_stations)
+
+    mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]
+
+    for key, drone in drones.items():
+        drone.setMissionList(mission_list)
 
     while True:
         frame = world.drawDEM()
