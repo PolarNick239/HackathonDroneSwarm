@@ -22,7 +22,7 @@
         "highresCamera",
         "cargo"
       ],
-      "speed" : 20,
+      "speed" : 12,
       "lifetime" : 10000
     },
     {
@@ -33,7 +33,7 @@
         "highresCamera",
         "geoRadar"
       ],
-      "speed" : 8,
+      "speed" : 4,
       "lifetime" : 10000
     },
     {
@@ -44,7 +44,7 @@
         "cargo",
         "geoRadar"
       ],
-      "speed" : 8,
+      "speed" : 6,
       "lifetime" : 10000
     }
   ]

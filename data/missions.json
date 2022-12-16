@@ -16,7 +16,19 @@
     },
     {
       "type" : "cargo",
-      "destination" : [3000, 2500]
+      "destination" : [9000, 13000]
+    },
+    {
+      "type" : "cargo",
+      "destination" : [8600, 14500]
+    },
+    {
+      "type" : "cargo",
+      "destination" : [10000, 15000]
+    },
+    {
+      "type" : "cargo",
+      "destination" : [2100, 17000]
     }
   ]
 }

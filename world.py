@@ -140,6 +140,7 @@ class World:
                     cv2.line(frame, (xprev, yprev), (x, y), color)
 
                 cv2.circle(frame, (x, y), waypoint_radius, color, waypoint_thickness)
+                cv2.circle(frame, (x, y), waypoint_radius+2, colors.BLACK, 1)
 
 
     def drawStations(self, frame):
