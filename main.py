@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
         drone_master.tryToScheduleTask(drones)
         for key, drone in drones.items():
-            drone.fly(dt)
+            drone.update(world, dt)
 
         world.drawStations(frame)
         world.drawDrones(frame)

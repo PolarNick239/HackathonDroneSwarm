@@ -5,7 +5,7 @@
     "maximum_allowed_height": 254,
     "simulation_step": 10,
     "drone_speed": 8.3,
-    "drone_life": 1800,
-    "charge_time": 300
+    "drone_life": 5000,
+    "charge_power": 10
   }
 }

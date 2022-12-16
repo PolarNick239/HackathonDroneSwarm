@@ -3,10 +3,11 @@ import json
 
 class Station:
 
-    def __init__(self, station_data) -> None:
+    def __init__(self, station_data, key) -> None:
         self.type = station_data["type"]
         self.x = station_data["x"]
         self.y = station_data["y"]
+        self.key = key
 
 
 def load_stations(json_path):
@@ -15,8 +16,9 @@ def load_stations(json_path):
     assert "stations" in stations_data
     control_station = None
     charge_stations = {}
-    for station_data in stations_data["stations"]:
-        station = Station(station_data)
+    for ind, station_data in enumerate(stations_data["stations"]):
+        key = ind + 1
+        station = Station(station_data, key)
         if station.type == "control":
             assert control_station is None
             control_station = station

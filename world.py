@@ -24,7 +24,7 @@ class World:
         self.simulation_step = world_data["simulation_step"]  # in seconds
         self.drones_speed = world_data["drone_speed"]  # m/s
         self.drone_lifetime = world_data["drone_life"]  # in seconds
-        self.charge_time = world_data["charge_time"]  # in seconds
+        self.charge_power = world_data["charge_power"]  # in seconds of flight per second of charge
 
         self.dem_image_scale_ratio = window_height // self.dem_image.height
         self.window_height = self.dem_image.height * self.dem_image_scale_ratio
