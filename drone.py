@@ -180,6 +180,10 @@ class Drone:
                 if not drone.needTask():
                     continue
 
+                # TODO if master drone has no payloads other drones do not become available
+                if mission.type not in drone.payload:
+                    continue
+
                 dist = distbetween(drone.x, drone.y, waypoint[0], waypoint[1])
                 drone_mission_pairs.append((dist, drone, mission))
 

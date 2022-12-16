@@ -2,24 +2,21 @@
   "drones": [
     {
       "isMaster": true,
-      "payload": []
-    },
-    {
-      "isMaster": false,
       "payload": [
-        "3dLidar",
-        "highresCamera",
-        "cargo",
-        "geoRadar"
+        "highresCamera"
       ]
     },
     {
       "isMaster": false,
       "payload": [
-        "agro",
-        "3dLidar",
-        "cargo",
-        "geoRadar"
+        "highresCamera"
+      ]
+    },
+    {
+      "isMaster": false,
+      "payload": [
+        "highresCamera",
+        "cargo"
       ]
     },
     {
@@ -35,7 +32,7 @@
       "isMaster": false,
       "payload": [
         "agro",
-        "gimbolCamera",
+        "highresCamera",
         "cargo",
         "geoRadar"
       ]

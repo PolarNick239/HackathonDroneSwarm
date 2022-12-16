@@ -34,12 +34,12 @@ if __name__ == '__main__':
     print("__________________________________")
 
     poly_missions = []
-    poly_missions += splitMission(MissionPoly(0, "scan", polySquare(10000, 2500, 10000, 10000), 500), 1000, 8)
-    poly_missions += splitMission(MissionPoly(4, "scan", [(10000, 15000), (15000, 20000), (5000, 20000)], 500), 1000, 8)
+    poly_missions += splitMission(MissionPoly(0, "highresCamera", polySquare(10000, 2500, 10000, 10000), 500), 1000, 8)
+    poly_missions += splitMission(MissionPoly(4, "highresCamera", [(10000, 15000), (15000, 20000), (5000, 20000)], 500), 1000, 8)
 
     path_missions = []
     path = world.estimatePath(16000, 17000, 30*world.dem_resolution, 25*world.dem_resolution) + world.estimatePath(30 * world.dem_resolution, 25*world.dem_resolution, 16000, 17000)
-    path_missions.append(MissionPath(5, "path", path))
+    path_missions.append(MissionPath(5, "cargo", path))
 
     mission_list = []
     mission_list += poly_missions
