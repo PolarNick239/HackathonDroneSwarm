@@ -104,21 +104,26 @@ class Drone:
             else:
                 raise Exception("this branch should not be touched")
 
-    def checkIfBatteryIsLow(self, charge_stations):
+    def timeToClosestChargeStationFrom(self, x, y, charge_stations):
         closest_station = None
         smallest_time_to_reach = None
         for key, station in charge_stations.items():
-            time_to_reach = self.timeTo(station.x, station.y)
+            time_to_reach = distbetween(x, y, station.x, station.y) / self.speed
             if smallest_time_to_reach is None or time_to_reach < smallest_time_to_reach:
                 closest_station = station
                 smallest_time_to_reach = time_to_reach
-        if self.lifetime_left < 2 * smallest_time_to_reach:
+        return closest_station, smallest_time_to_reach
+
+    def checkIfBatteryIsLow(self, charge_stations):
+        closest_station, smallest_time_to_reach = self.timeToClosestChargeStationFrom(self.x, self.y, charge_stations)
+
+        if smallest_time_to_reach >= self.lifetime_left:
             print("Drone {}: low battery, flying to station {}".format(self.key, closest_station.key))
             self.state = "flyToCharge"
             if self.targetMission is not None:
                 self.mission_list.append(self.targetMission)
                 self.targetMission = None
-            #TODO make task as well?
+            # TODO make task as well?
             self.targetX, self.targetY = closest_station.x, closest_station.y
 
     def update(self, world, dt):
@@ -147,6 +152,7 @@ class Drone:
     def addTask(self, mission):
         assert self.needTask()
 
+        print("Drone {}: new mission {}".format(self.key, mission.key))
         self.flying = True
         self.targetMission = mission
         if self.state in {"wait"}:
@@ -154,40 +160,57 @@ class Drone:
             self.targetX = mission.nextWaypoint()[0]
             self.targetY = mission.nextWaypoint()[1]
 
-    def selectBestMission(self, drone):
-        dist = None
-        result = None
-        for mission in self.mission_list:
-            # TODO mission type check
-            if dist is None or distbetween(mission.x, mission.y, drone.x, drone.y) < dist:
-                result = mission
-
-        if result is not None:
-            self.mission_list.remove(result)
-
-        return result
-
-    def tryToScheduleTask(self, drones):
+    def tryToScheduleTasks(self, available_drones, charge_stations):
         assert self.is_master
 
-        drone_mission_pairs = []
+        # This is an algorithm similar to Hungarian algorithm - https://en.wikipedia.org/wiki/Hungarian_algorithm
+        # we want to split missions between drones with "cheapest cost"
+        # where cost includes "how close drone to mission start?", "is its bettery enough?"
+        # and "how easy another drone will execute that mission after its current mission"
+        progress = True
+        while progress:
+            progress = False
+            missions = list(filter(lambda mission: mission.hasNextWaypoint(), self.mission_list))
+            drones = list(filter(lambda drone: drone.needTask(), available_drones.values()))
+            drones_on_mission = list(filter(lambda drone: drone.targetMission is not None, available_drones.values()))
+            INF = 1e12
+            try_to_take_far_mission_from_others_weight = 0.25
+            costs_matrix = [[INF] * len(missions)] * len(drones)
+            win_j, win_i, win_cost = -1, -1, INF
+            for j, drone in enumerate(drones):
+                for i, mission in enumerate(missions):
+                    # TODO when payloads will be added
+                    # if mission.payload not in drone.payloads:
+                    #     continue
+                    time_to_start = drone.timeTo(*mission.getFirstWaypoint())
+                    time_to_execute = mission.getTotalLength() / drone.speed
+                    _, time_to_charge = self.timeToClosestChargeStationFrom(*mission.getLastWaypoint(), charge_stations)
+                    total_time = time_to_start + time_to_execute + time_to_charge
+                    if total_time > drone.lifetime_left:
+                        # this drone can't finish this mission part
+                        continue
 
-        for mission in self.mission_list:
-            if not mission.hasNextWaypoint():
-                continue
-            waypoint = mission.nextWaypoint()
-            for _, drone in drones.items():
-                if not drone.needTask():
-                    continue
+                    closest_mission_finish_time = INF
+                    for another_drone in drones_on_mission:
+                        assert another_drone.targetMission is not None
+                        another_drone_time_to_finish = another_drone.targetMission.getTotalLength() / another_drone.speed
+                        another_drone_time_to_start = distbetween(*another_drone.targetMission.getLastWaypoint(), *mission.getFirstWaypoint()) / another_drone.speed
+                        another_drone_time_to_execute = mission.getTotalLength() / another_drone.speed
+                        _, another_drone_time_to_charge = another_drone.timeToClosestChargeStationFrom(*mission.getLastWaypoint(), charge_stations)
+                        another_drone_time = another_drone_time_to_finish + another_drone_time_to_start + another_drone_time_to_execute + another_drone_time_to_charge
+                        another_drone_can_take_the_same_mission = another_drone_time < another_drone.lifetime_left
+                        if another_drone_can_take_the_same_mission:
+                            closest_mission_finish_time = min(another_drone_time_to_start, closest_mission_finish_time)
 
-                dist = distbetween(drone.x, drone.y, waypoint[0], waypoint[1])
-                drone_mission_pairs.append((dist, drone, mission))
-
-        for _, drone, mission in sorted(drone_mission_pairs, key=lambda a: a[0]):
-            if not drone.needTask() or mission not in self.mission_list:
-                continue
-            drone.addTask(mission)
-            self.mission_list.remove(mission)
+                    cost = time_to_start + time_to_execute - closest_mission_finish_time * try_to_take_far_mission_from_others_weight
+                    costs_matrix[j][i] = cost
+                    if cost < win_cost:
+                        win_j, win_i, win_cost = j, i, cost
+            if win_j != -1 and win_i != -1:
+                mission = missions[win_i]
+                drones[win_j].addTask(mission)
+                self.mission_list.remove(mission)
+                progress = True
 
 
 def load_drones(json_path, start_x, start_y, world):
