@@ -20,6 +20,10 @@
       "rect": [5000, 20000, 10000, 2000]
     },
     {
+      "type": "patrolCamera",
+      "patrolrect": [12000, 4000, 9500, 9500]
+    },
+    {
       "type" : "cargo",
       "destination" : [9000, 13000]
     },

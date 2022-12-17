@@ -2,7 +2,7 @@ from station import load_stations
 from drone import load_drones
 from world import World
 import colors
-from mission import Mission, MissionPoly, MissionPath, splitMission, load_missions
+from mission import Mission, MissionPoly, MissionPath, splitMission, load_missions, MissionPatrol
 import random
 
 import cv2
@@ -46,11 +46,14 @@ if __name__ == '__main__':
 
     poly_missions = []
     path_missions = []
+    patrol_missions = []
     for mission in mission_list:
         if isinstance(mission, MissionPath):
             path_missions.append(mission)
         if isinstance(mission, MissionPoly):
             poly_missions.append(mission)
+        if isinstance(mission, MissionPatrol):
+            patrol_missions.append(mission)
 
     # mission_list = [Mission(key + 1, 10000, random.random() * 22500, random.random() * 22500) for key in range(10)]
 
@@ -73,6 +76,7 @@ if __name__ == '__main__':
         world.drawStations(frame)
         world.drawPolygonMissions(frame, poly_missions) #TODO move to world?
         world.drawPathMissions(frame, path_missions) #TODO move to world?
+        world.drawPathMissions(frame, patrol_missions) #TODO move to world?
         world.drawDrones(frame)
 
         cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format("1/{}".format(slowdown) if slowdown > 1 else steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)

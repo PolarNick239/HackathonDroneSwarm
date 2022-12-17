@@ -1,7 +1,7 @@
 import json
 import random
 
-from mission import Mission, MissionPoly, MissionPath
+from mission import Mission, MissionPoly, MissionPath, MissionPatrol
 from utils import *
 
 
@@ -110,6 +110,9 @@ class Drone:
                 print("Drone {}: fail, we are on mission but have no agro payload left!".format(self.key))
         if self.targetMission.finished():
             # print("Drone {}: mission {} finished".format(self.key, self.targetMission.key))
+            if isinstance(self.targetMission, MissionPatrol):
+                self.targetMission.reset()
+                self.mission_list.append(self.targetMission)
             self.targetMission = None
             self.state = "wait"
         elif self.targetMission.hasNextWaypoint():

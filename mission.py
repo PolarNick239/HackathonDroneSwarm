@@ -130,6 +130,48 @@ class MissionPath:
         return length
 
 
+class MissionPatrol:
+
+    def __init__(self, key, type, path):
+        assert type != "agro"
+        self.key = key
+        self.type = type
+        self.waypoints = path
+        self.waypoint_visited = [False for _ in self.waypoints]
+        self.n_waypoints_visited = 0
+
+    def update(self, dt):
+        self.waypoint_visited[self.n_waypoints_visited] = True
+        self.n_waypoints_visited += 1
+
+    def finished(self):
+        return self.n_waypoints_visited >= len(self.waypoints)
+
+    def hasNextWaypoint(self):
+        return not self.finished()
+
+    def nextWaypoint(self):
+        return self.waypoints[self.n_waypoints_visited]
+
+    def getFirstWaypoint(self):
+        return self.waypoints[0]
+
+    def getLastWaypoint(self):
+        return self.waypoints[-1]
+
+    def reset(self):
+        self.waypoint_visited = [False for _ in self.waypoints]
+        self.n_waypoints_visited = 0
+
+    def getTotalLength(self):
+        length = 0.0
+        for i in range(1, len(self.waypoints)):
+            x0, y0 = self.waypoints[i - 1]
+            x1, y1 = self.waypoints[i]
+            length += distbetween(x0, y0, x1, y1)
+        return length
+
+
 def splitMission(mission, time_budget, speed):
     result = []
 
@@ -171,7 +213,12 @@ def load_missions(json_path, step, control_station, world):
     for mission_data in missions_data["missions"]:
         key += 1
 
-        if "destination" in mission_data:
+        if "patrolrect" in mission_data or "patrolpoly" in mission_data:
+            polygon = polySquare(mission_data["patrolrect"]) if "patrolrect" in mission_data else mission_data["patrolpoly"]
+            polygon.append(polygon[0])
+            mission = MissionPatrol(key, mission_data["type"], polygon)
+            missions.append(mission)
+        elif "destination" in mission_data:
             destination = mission_data["destination"]
             # path = world.estimatePath(control_station.x, control_station.y, destination[0], destination[1])
             mission = MissionPath(key, mission_data["type"], [destination])

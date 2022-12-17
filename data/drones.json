@@ -23,6 +23,14 @@
     {
       "isMaster": false,
       "payload": [
+        "patrolCamera"
+      ],
+      "speed" : 6,
+      "lifetime" : 12000
+    },
+    {
+      "isMaster": false,
+      "payload": [
         "highresCamera",
         "cargo"
       ],
