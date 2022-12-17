@@ -96,6 +96,8 @@ if __name__ == '__main__':
                 steps_per_frame = max(1, steps_per_frame // 2)
             else:
                 slowdown *= 2
+        elif key == 13:  # enter
+            slowdown = 1
         elif key != -1:
             # print("GUI: Unhandled key: {}".format(key))
             pass
