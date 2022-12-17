@@ -181,17 +181,16 @@ class Drone:
             self.updateCharge(dt)
         elif self.state == "wait":
             # master drone patrols between charging stations to connect to lost drones
-            # if self.is_master:
-            #     reachable_drones = world.getWirelessReachableDrones(self)
-            #     if len(reachable_drones) < len(world.drones):
-            #         furthest_station, largest_time_to_reach = self.timeToFurthestChargeStationFrom(self.x, self.y, world.charge_stations)
-            #         if self.lifetime_left >= largest_time_to_reach:
-            #             path = world.estimatePath(self.x, self.y, furthest_station.x, furthest_station.y)
-            #             self.pathPlannerMission = MissionPath(0, "", path)
-            #             self.targetX = self.pathPlannerMission.nextWaypoint()[0]
-            #             self.targetY = self.pathPlannerMission.nextWaypoint()[1]
-            #             self.state = "flyToCharge"
-            pass  # TODO we can fly into the center of area (or closer to the charge station/go to charge if we have less than 50% battery)
+            if self.is_master:
+                reachable_drones = world.getWirelessReachableDrones(self)
+                if len(reachable_drones) < len(world.drones):
+                    furthest_station, largest_time_to_reach = self.timeToFurthestChargeStationFrom(self.x, self.y, world.charge_stations)
+                    if self.lifetime_left >= largest_time_to_reach:
+                        path = world.estimatePath(self.x, self.y, furthest_station.x, furthest_station.y)
+                        self.pathPlannerMission = MissionPath(0, "", path)
+                        self.targetX = self.pathPlannerMission.nextWaypoint()[0]
+                        self.targetY = self.pathPlannerMission.nextWaypoint()[1]
+                        self.state = "flyToCharge"
         else:
             raise Exception("state={} is incorrect!".format(self.state))
 
