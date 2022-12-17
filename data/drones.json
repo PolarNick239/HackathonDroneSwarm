@@ -8,6 +8,7 @@
         "highresCamera",
         "geoRadar"
       ],
+      "payloadAgroVolume": 1000,
       "speed" : 8,
       "lifetime" : 7500
     },
@@ -47,6 +48,7 @@
         "cargo",
         "geoRadar"
       ],
+      "payloadAgroVolume": 4000,
       "speed" : 4,
       "lifetime" : 7500
     }

@@ -55,13 +55,14 @@ def rasterizePolygon(polygon, step):
 
 class MissionPoly:
 
-    def __init__(self, key, type, polygon, step):
+    def __init__(self, key, type, polygon, step, agroVolumePerSecond=None):
         self.key = key
         self.type = type
         self.polygon = polygon
         self.waypoints = rasterizePolygon(polygon, step)
         self.waypoint_visited = [False for _ in self.waypoints]
         self.n_waypoints_visited = 0
+        self.agroVolumePerSecond = agroVolumePerSecond
 
     def update(self, dt):
         self.waypoint_visited[self.n_waypoints_visited] = True
@@ -94,6 +95,7 @@ class MissionPoly:
 class MissionPath:
 
     def __init__(self, key, type, path):
+        assert type != "agro"
         self.key = key
         self.type = type
         self.waypoints = path
@@ -176,7 +178,11 @@ def load_missions(json_path, step, control_station, world):
             missions.append(mission)
         else:
             polygon = polySquare(mission_data["rect"]) if "rect" in mission_data else mission_data["polygon"]
-            mission = MissionPoly(key, mission_data["type"], polygon, step)
+            type = mission_data["type"]
+            if type == "agro":
+                mission = MissionPoly(key, type, polygon, step, mission_data["agroVolumePerSecond"])
+            else:
+                mission = MissionPoly(key, type, polygon, step)
             missions.append(mission)
 
     return missions

@@ -26,6 +26,15 @@ class Drone:
         self.mission_list = []
         self.flying = False
 
+        if "payloadAgroVolume" in drone_data:
+            assert "agro" in self.payload
+        if "agro" in self.payload:
+            assert "payloadAgroVolume" in drone_data
+            self.payloadAgroVolume = drone_data["payloadAgroVolume"]
+        else:
+            self.payloadAgroVolume = 0.0
+        self.payloadAgroVolumeLeft = self.payloadAgroVolume
+
         self.state = "wait"
 
     # now one object shared between all drones
@@ -95,6 +104,10 @@ class Drone:
     def updateMission(self, dt):
         assert self.state == "onMission"
         self.targetMission.update(dt)
+        if self.targetMission.type == "agro":
+            self.payloadAgroVolumeLeft -= self.targetMission.agroVolumePerSecond * dt
+            if self.payloadAgroVolumeLeft < 0.0:
+                print("Drone {}: fail, we are on mission but have no agro payload left!".format(self.key))
         if self.targetMission.finished():
             # print("Drone {}: mission {} finished".format(self.key, self.targetMission.key))
             self.targetMission = None
@@ -115,6 +128,9 @@ class Drone:
                 self.state = "wait"
             else:
                 raise Exception("this branch should not be touched")
+        if self.payloadAgroVolumeLeft != self.payloadAgroVolume:
+            print("Drone {}: Agro payload updated!".format(self.key))
+            self.payloadAgroVolumeLeft = self.payloadAgroVolume
 
     def timeToClosestChargeStationFrom(self, x, y, charge_stations):
         closest_station = None
@@ -223,6 +239,8 @@ class Drone:
 
                     time_to_start = drone.timeTo(*mission.getFirstWaypoint())
                     time_to_execute = mission.getTotalLength() / drone.speed
+                    if mission.type == "agro" and drone.payloadAgroVolumeLeft < time_to_execute * mission.agroVolumePerSecond:
+                        continue
                     _, time_to_charge = self.timeToClosestChargeStationFrom(*mission.getLastWaypoint(), charge_stations)
                     total_time = time_to_start + time_to_execute + time_to_charge
                     if total_time > drone.lifetime_left:

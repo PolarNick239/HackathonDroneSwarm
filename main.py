@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
     is_paused = False
     steps_per_frame = 1
-    slowdown = 8
+    slowdown = 4
 
     print("__________________________________")
     print("Welcome to {}!".format(window_name))
