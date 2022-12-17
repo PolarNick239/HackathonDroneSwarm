@@ -126,6 +126,16 @@ class Drone:
                 smallest_time_to_reach = time_to_reach
         return closest_station, smallest_time_to_reach
 
+    def timeToFurthestChargeStationFrom(self, x, y, charge_stations):
+        furthest_station = None
+        largest_time_to_reach = None
+        for key, station in charge_stations.items():
+            time_to_reach = distbetween(x, y, station.x, station.y) / self.speed
+            if largest_time_to_reach is None or time_to_reach > largest_time_to_reach:
+                furthest_station = station
+                largest_time_to_reach = time_to_reach
+        return furthest_station, largest_time_to_reach
+
     def checkIfBatteryIsLow(self, charge_stations, world):
         closest_station, smallest_time_to_reach = self.timeToClosestChargeStationFrom(self.x, self.y, charge_stations)
 
@@ -154,6 +164,17 @@ class Drone:
         elif self.state == "onCharge":
             self.updateCharge(dt)
         elif self.state == "wait":
+            # master drone patrols between charging stations to connect to lost drones
+            # if self.is_master:
+            #     reachable_drones = world.getWirelessReachableDrones(self)
+            #     if len(reachable_drones) < len(world.drones):
+            #         furthest_station, largest_time_to_reach = self.timeToFurthestChargeStationFrom(self.x, self.y, world.charge_stations)
+            #         if self.lifetime_left >= largest_time_to_reach:
+            #             path = world.estimatePath(self.x, self.y, furthest_station.x, furthest_station.y)
+            #             self.pathPlannerMission = MissionPath(0, "", path)
+            #             self.targetX = self.pathPlannerMission.nextWaypoint()[0]
+            #             self.targetY = self.pathPlannerMission.nextWaypoint()[1]
+            #             self.state = "flyToCharge"
             pass  # TODO we can fly into the center of area (or closer to the charge station/go to charge if we have less than 50% battery)
         else:
             raise Exception("state={} is incorrect!".format(self.state))

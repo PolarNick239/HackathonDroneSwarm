@@ -4,7 +4,7 @@
     "dem_path": "data/dem.png",
     "maximum_allowed_height": 227,
     "simulation_step": 10,
-    "wireless_range": 9000,
+    "wireless_range": 10000,
     "charge_power": 10
   }
 }

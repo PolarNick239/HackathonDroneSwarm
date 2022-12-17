@@ -3,18 +3,21 @@
     {
       "isMaster": true,
       "payload": [
-        "highresCamera"
+        "agro",
+        "3dLidar",
+        "highresCamera",
+        "geoRadar"
       ],
-      "speed" : 10,
-      "lifetime" : 10000
+      "speed" : 8,
+      "lifetime" : 7500
     },
     {
       "isMaster": false,
       "payload": [
         "highresCamera"
       ],
-      "speed" : 8,
-      "lifetime" : 10000
+      "speed" : 6,
+      "lifetime" : 7500
     },
     {
       "isMaster": false,
@@ -22,19 +25,19 @@
         "highresCamera",
         "cargo"
       ],
-      "speed" : 12,
-      "lifetime" : 10000
+      "speed" : 10,
+      "lifetime" : 7500
     },
     {
       "isMaster": false,
       "payload": [
-        "agro",
+        "agro_",
         "3dLidar",
         "highresCamera",
         "geoRadar"
       ],
-      "speed" : 4,
-      "lifetime" : 10000
+      "speed" : 5,
+      "lifetime" : 7500
     },
     {
       "isMaster": false,
@@ -44,8 +47,8 @@
         "cargo",
         "geoRadar"
       ],
-      "speed" : 6,
-      "lifetime" : 10000
+      "speed" : 4,
+      "lifetime" : 7500
     }
   ]
 }

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     mission_list_split = []
     for mission in mission_list:
         if isinstance(mission, MissionPoly):
-            mission_list_split += splitMission(mission, 2000, 8)
+            mission_list_split += splitMission(mission, 1000, 8)
         else:
             mission_list_split.append(mission)
     mission_list = mission_list_split
