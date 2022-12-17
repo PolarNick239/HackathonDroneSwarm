@@ -129,7 +129,7 @@ class Drone:
             else:
                 raise Exception("this branch should not be touched")
         if self.payloadAgroVolumeLeft != self.payloadAgroVolume:
-            print("Drone {}: Agro payload updated!".format(self.key))
+            print("Drone {}: Agro payload updated to {}!".format(self.key, self.payloadAgroVolume))
             self.payloadAgroVolumeLeft = self.payloadAgroVolume
 
     def timeToClosestChargeStationFrom(self, x, y, charge_stations):
