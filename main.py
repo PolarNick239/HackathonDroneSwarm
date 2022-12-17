@@ -33,8 +33,9 @@ if __name__ == '__main__':
     window_name = "Drones Swarm Simulator"
     cv2.namedWindow(window_name, (cv2.WINDOW_AUTOSIZE if window_height < 1200 else cv2.WINDOW_NORMAL) | cv2.WINDOW_KEEPRATIO | cv2.WINDOW_GUI_NORMAL)
 
-    is_paused = True
+    is_paused = False
     steps_per_frame = 1
+    slowdown = 8
 
     print("__________________________________")
     print("Welcome to {}!".format(window_name))
@@ -67,14 +68,14 @@ if __name__ == '__main__':
                 master_drone.tryToScheduleTasks(available_drones, charge_stations, world)
                 for key in sorted(drones.keys()):
                     drone = drones[key]
-                    drone.update(world, dt)
+                    drone.update(world, dt / slowdown)
 
         world.drawStations(frame)
         world.drawPolygonMissions(frame, poly_missions) #TODO move to world?
         world.drawPathMissions(frame, path_missions) #TODO move to world?
         world.drawDrones(frame)
 
-        cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format(steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
+        cv2.putText(frame, "PAUSE (press SPACE BAR)" if is_paused else "x{}".format("1/{}".format(slowdown) if slowdown > 1 else steps_per_frame), (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, colors.BLACK, 1, 2)
 
         cv2.imshow(window_name, frame)
         key = cv2.waitKey(1000//60)  # lock to 60 fps
@@ -83,17 +84,18 @@ if __name__ == '__main__':
         elif key == 32:  # Space bar
             if not is_paused:
                 is_paused = True
-                print("GUI: Paused!")
             else:
                 is_paused = False
-                print("GUI: Un-paused!")
         elif key == 43:  # +
-            steps_per_frame *= 2
-            print("GUI: speedup to x{} steps per frame".format(steps_per_frame))
+            if slowdown > 1:
+                slowdown //= 2
+            else:
+                steps_per_frame *= 2
         elif key == 45:  # -
             if steps_per_frame != 1:
                 steps_per_frame = max(1, steps_per_frame // 2)
-                print("GUI: slow down to x{} steps per frame".format(steps_per_frame))
+            else:
+                slowdown *= 2
         elif key != -1:
             # print("GUI: Unhandled key: {}".format(key))
             pass
