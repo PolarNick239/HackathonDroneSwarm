@@ -213,8 +213,8 @@ def load_missions(json_path, step, control_station, world):
     for mission_data in missions_data["missions"]:
         key += 1
 
-        if "patrolrect" in mission_data or "patrolpoly" in mission_data:
-            polygon = polySquare(mission_data["patrolrect"]) if "patrolrect" in mission_data else mission_data["patrolpoly"]
+        if "patrolrect" in mission_data or "patrolpolygon" in mission_data:
+            polygon = polySquare(mission_data["patrolrect"]) if "patrolrect" in mission_data else mission_data["patrolpolygon"]
             polygon.append(polygon[0])
             mission = MissionPatrol(key, mission_data["type"], polygon)
             missions.append(mission)
